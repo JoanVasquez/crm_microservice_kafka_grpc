@@ -1,4 +1,4 @@
-# crm_node_k8s
+# crm_microservices_kafka_grpc
 
 IMPORTANT: this repository is intended to be run only with Docker / docker-compose. Running services individually outside of Docker is unsupported by this README.
 
