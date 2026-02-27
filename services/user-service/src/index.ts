@@ -1,6 +1,13 @@
 import "reflect-metadata";
 import { container } from "tsyringe";
-import { Server, ServerCredentials, loadPackageDefinition } from "@grpc/grpc-js";
+import {
+  GrpcObject,
+  Server,
+  ServerCredentials,
+  ServiceDefinition,
+  UntypedServiceImplementation,
+  loadPackageDefinition,
+} from "@grpc/grpc-js";
 import { loadSync } from "@grpc/proto-loader";
 import { register } from "shared/dist/utils/metrics";
 import { UserController } from "./controller/user.controller";
@@ -8,6 +15,11 @@ import { registerDependencies } from "./containers";
 import { initializeDatabase } from "./config/database";
 
 const PROTO_PATH = "/app/shared/proto/user.proto";
+type UserGrpcNamespace = {
+  UserService?: {
+    service: ServiceDefinition<UntypedServiceImplementation>;
+  };
+};
 
 async function startServer() {
   try {
@@ -26,7 +38,11 @@ async function startServer() {
       oneofs: true,
     });
 
-    const userProto: any = loadPackageDefinition(packageDefinition).user;
+    const grpcObject = loadPackageDefinition(packageDefinition) as GrpcObject;
+    const userProto = grpcObject.user as UserGrpcNamespace;
+    if (!userProto?.UserService?.service) {
+      throw new Error("UserService definition not found in loaded proto");
+    }
     const server = new Server();
 
     // Get UserController from container (it will have RedisCacheService injected)

@@ -6,11 +6,13 @@ import { GenericRepository } from "shared";
 
 @injectable()
 export class UserRepository extends GenericRepository<User> implements IUserRepository {
-  private readonly userRepository;
+  private readonly userRepository = AppDataSource.getRepository(User);
 
-  constructor(@inject("AppDataSource") dataSource: any) {
+  constructor(
+    @inject("AppDataSource")
+    dataSource: ConstructorParameters<typeof GenericRepository<User>>[0],
+  ) {
     super(dataSource, User);
-    this.userRepository = AppDataSource.getRepository(User);
   }
 
   async findByEmail(email: string): Promise<User | null> {

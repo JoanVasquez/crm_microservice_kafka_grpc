@@ -1,6 +1,10 @@
+import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import bcrypt from "bcryptjs";
 import { UserService } from "./user.service";
 import { User } from "../entities/user.entity";
+import { UpdateUserDto } from "../dtos/user.dto";
+import { UserRepository } from "../repository/user.repository.impl";
+import { ICacheService } from "shared";
 
 jest.mock("bcryptjs", () => ({
   hash: jest.fn(),
@@ -11,19 +15,13 @@ jest.mock("../repository/user.repository.impl", () => ({
   UserRepository: class UserRepository {},
 }));
 
-type MockedRepo = {
-  findByEmail: any;
-  create: any;
-  findById: any;
-  update: any;
-  delete: any;
-  findAll: any;
-};
-
-type MockedCache = {
-  set: any;
-  get: any;
-  delete: any;
+type RepoLike = {
+  findByEmail(email: string): Promise<User | null>;
+  create(user: User): Promise<User>;
+  findById(id: string): Promise<User | null>;
+  update(id: string, userData: UpdateUserDto): Promise<User | null>;
+  delete(id: string): Promise<boolean>;
+  findAll(page: number, limit: number): Promise<{ items: User[]; total: number }>;
 };
 
 const makeUser = (): User =>
@@ -39,8 +37,8 @@ const makeUser = (): User =>
   }) as User;
 
 describe("UserService", () => {
-  let repository: MockedRepo;
-  let cacheService: MockedCache;
+  let repository: jest.Mocked<RepoLike>;
+  let cacheService: jest.Mocked<ICacheService>;
   let service: UserService;
 
   beforeEach(() => {
@@ -54,12 +52,16 @@ describe("UserService", () => {
     };
 
     cacheService = {
-      set: jest.fn().mockResolvedValue(undefined),
-      get: jest.fn().mockResolvedValue(null),
-      delete: jest.fn().mockResolvedValue(undefined),
+      set: jest.fn(async () => undefined),
+      get: jest.fn(async () => null),
+      delete: jest.fn(async () => undefined),
+      exists: jest.fn(async () => false),
     };
 
-    service = new UserService(repository as any, cacheService as any);
+    service = new UserService(
+      repository as unknown as UserRepository,
+      cacheService as unknown as ICacheService,
+    );
     jest.clearAllMocks();
   });
 
@@ -79,7 +81,7 @@ describe("UserService", () => {
   it("creates user with hashed password and caches it", async () => {
     const createdUser = makeUser();
     repository.findByEmail.mockResolvedValue(null);
-    (bcrypt.hash as any).mockResolvedValue("hashed-password");
+    (bcrypt.hash as unknown as ReturnType<typeof jest.fn>).mockResolvedValue("hashed-password");
     repository.create.mockResolvedValue(createdUser);
 
     const result = await service.CreateUser({
@@ -127,7 +129,7 @@ describe("UserService", () => {
   it("validates active user with matching password", async () => {
     const user = makeUser();
     repository.findByEmail.mockResolvedValue(user);
-    (bcrypt.compare as any).mockResolvedValue(true);
+    (bcrypt.compare as unknown as ReturnType<typeof jest.fn>).mockResolvedValue(true);
 
     const result = await service.validateUser("john@example.com", "password123");
 
@@ -138,7 +140,7 @@ describe("UserService", () => {
   it("returns null for invalid user credentials", async () => {
     const user = makeUser();
     repository.findByEmail.mockResolvedValue(user);
-    (bcrypt.compare as any).mockResolvedValue(false);
+    (bcrypt.compare as unknown as ReturnType<typeof jest.fn>).mockResolvedValue(false);
 
     const result = await service.validateUser("john@example.com", "bad-password");
 
