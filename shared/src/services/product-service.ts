@@ -22,40 +22,38 @@ export class ProductServiceClient {
 
   constructor() {
     this.grpcService = new GrpcService(
-      'product',
-      '/app/shared/proto/product.proto',
+      "ProductService",
+      "Product",
+      "/app/shared/proto/product.proto",
       config.services.product.host,
-      config.services.product.port
+      config.services.product.port,
     );
   }
 
   async createProduct(request: CreateProductRequest): Promise<ProductResponse> {
-    return this.grpcService.call<ProductResponse>('CreateProduct', request);
+    return this.grpcService.call<ProductResponse>("CreateProduct", request);
   }
 
-  async getProducts( 
-    page: number = 1,
-    limit: number = 10
-  ): Promise<ProductResponse[]> {
-    return this.grpcService.call<ProductResponse[]>('GetProducts', {
+  async getProducts(page: number = 1, limit: number = 10): Promise<ProductResponse[]> {
+    return this.grpcService.call<ProductResponse[]>("GetProducts", {
       page,
-      limit
+      limit,
     });
   }
 
   async getProduct(id: string): Promise<ProductResponse> {
-    return this.grpcService.call<ProductResponse>('GetProduct', { id });
+    return this.grpcService.call<ProductResponse>("GetProduct", { id });
   }
 
   async updateProduct(id: string, request: CreateProductRequest): Promise<ProductResponse> {
-    return this.grpcService.call<ProductResponse>('UpdateProduct', { id, ...request });
+    return this.grpcService.call<ProductResponse>("UpdateProduct", { id, ...request });
   }
 
   async updateStock(id: string, quantity: number): Promise<ProductResponse> {
-    return this.grpcService.call<ProductResponse>('UpdateStock', { id, quantity });
+    return this.grpcService.call<ProductResponse>("UpdateStock", { id, quantity });
   }
 
   async deleteProduct(id: string): Promise<void> {
-    return this.grpcService.call<void>('DeleteProduct', { id });
+    return this.grpcService.call<void>("DeleteProduct", { id });
   }
 }

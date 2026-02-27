@@ -1,4 +1,4 @@
-import { Consumer, Kafka, Producer, KafkaJSNonRetriableError } from "kafkajs";
+import { Consumer, Producer, KafkaJSNonRetriableError } from "kafkajs";
 import { kafka } from "../config/kafka";
 import { injectable } from "tsyringe";
 import { IMessagingService } from "./IMessagingService";
@@ -13,7 +13,7 @@ export class KafkaMessagingService implements IMessagingService {
   private reconnectInterval: NodeJS.Timeout | null = null;
 
   constructor() {
-    const groupId = process.env.KAFKA_GROUP_ID || 'user-service-group';
+    const groupId: string = process.env.KAFKA_GROUP_ID!;
 
     this.producer = kafka.producer({
       allowAutoTopicCreation: true,
@@ -26,8 +26,6 @@ export class KafkaMessagingService implements IMessagingService {
       allowAutoTopicCreation: true,
       retry: { initialRetryTime: 100, retries: 3 },
     });
-
-    // ❌ No conectamos automáticamente en el constructor
   }
 
   private async connectProducer(): Promise<void> {
@@ -76,7 +74,7 @@ export class KafkaMessagingService implements IMessagingService {
       await Promise.race([
         this.producer.send({ topic, messages: [{ key: event.id, value: messageValue }] }),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Kafka publish timeout after 2s")), 2000)
+          setTimeout(() => reject(new Error("Kafka publish timeout after 2s")), 2000),
         ),
       ]);
 

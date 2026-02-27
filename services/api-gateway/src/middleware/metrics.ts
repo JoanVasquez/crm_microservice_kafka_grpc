@@ -1,11 +1,11 @@
-import { Request, Response, NextFunction } from 'express';
-import { httpRequestDuration, httpRequestsTotal } from 'shared/dist'
+import { Request, Response, NextFunction } from "express";
+import { httpRequestDuration, httpRequestsTotal } from "shared/dist";
 
 export const metricsMiddleware = (serviceName: string) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     const start = Date.now();
 
-    res.on('finish', () => {
+    res.on("finish", () => {
       const duration = (Date.now() - start) / 1000;
       const labels = {
         method: req.method,

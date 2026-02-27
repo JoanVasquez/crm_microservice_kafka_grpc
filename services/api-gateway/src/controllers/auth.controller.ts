@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
-import { UserServiceClient } from 'shared/dist';
-import { config } from 'shared/dist';
+import { Request, Response } from "express";
+import jwt from "jsonwebtoken";
+import { UserServiceClient } from "shared/dist";
+import { config } from "shared/dist";
 
 export class AuthController {
   private userService: UserServiceClient;
@@ -12,17 +12,17 @@ export class AuthController {
 
   async register(req: Request, res: Response): Promise<void> {
     const { email, firstName, lastName, password } = req.body;
-    
+
     console.log(`📝 Registration attempt for: ${email}`);
 
     const user = await this.userService.createUser({
       email,
       firstName,
       lastName,
-      password
+      password,
     });
 
-    console.log('✅ User created successfully');
+    console.log("✅ User created successfully");
     res.status(201).json(user);
   }
 
@@ -33,21 +33,19 @@ export class AuthController {
     const response = await this.userService.validateUser({ email, password });
 
     if (!response.valid || !response.user) {
-      res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).json({ error: "Invalid credentials" });
       return;
     }
 
-    const token = jwt.sign(
-      { id: response.user.id, email: response.user.email },
-      config.jwtSecret,
-      { expiresIn: config.jwtExpiresIn }
-    );
+    const token = jwt.sign({ id: response.user.id, email: response.user.email }, config.jwtSecret, {
+      expiresIn: config.jwtExpiresIn,
+    });
 
     console.log(`✅ Login successful for: ${email}`);
-    res.json({ 
-      user: response.user, 
+    res.json({
+      user: response.user,
       token,
-      message: 'Login successful'
+      message: "Login successful",
     });
   }
 }

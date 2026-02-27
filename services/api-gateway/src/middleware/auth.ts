@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { config } from 'shared/dist';
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
+import { config } from "shared/dist";
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -9,12 +9,16 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
-export const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+export const authenticateToken = (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): void => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
-    res.status(401).json({ error: 'Access token required' });
+    res.status(401).json({ error: "Access token required" });
     return;
   }
 
@@ -23,6 +27,6 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
     req.user = { id: decoded.id, email: decoded.email };
     next();
   } catch (error) {
-    res.status(403).json({ error: 'Invalid or expired token' });
+    res.status(403).json({ error: "Invalid or expired token" });
   }
 };

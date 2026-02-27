@@ -5,7 +5,7 @@ export interface BaseEvent {
 }
 
 export interface UserCreatedEvent extends BaseEvent {
-  type: 'user.created';
+  type: "user.created";
   data: {
     userId: string;
     email: string;
@@ -15,7 +15,7 @@ export interface UserCreatedEvent extends BaseEvent {
 }
 
 export interface UserUpdatedEvent extends BaseEvent {
-  type: 'user.updated';
+  type: "user.updated";
   data: {
     userId: string;
     changes: Record<string, any>;
@@ -23,7 +23,7 @@ export interface UserUpdatedEvent extends BaseEvent {
 }
 
 export interface ProductCreatedEvent extends BaseEvent {
-  type: 'product.created';
+  type: "product.created";
   data: {
     productId: string;
     name: string;
@@ -33,7 +33,7 @@ export interface ProductCreatedEvent extends BaseEvent {
 }
 
 export interface ProductStockUpdatedEvent extends BaseEvent {
-  type: 'product.stock.updated';
+  type: "product.stock.updated";
   data: {
     productId: string;
     oldStock: number;
@@ -42,7 +42,7 @@ export interface ProductStockUpdatedEvent extends BaseEvent {
 }
 
 export interface OrderCreatedEvent extends BaseEvent {
-  type: 'order.created';
+  type: "order.created";
   data: {
     orderId: string;
     userId: string;
@@ -56,7 +56,7 @@ export interface OrderCreatedEvent extends BaseEvent {
 }
 
 export interface OrderStatusUpdatedEvent extends BaseEvent {
-  type: 'order.status.updated';
+  type: "order.status.updated";
   data: {
     orderId: string;
     oldStatus: string;
@@ -64,10 +64,10 @@ export interface OrderStatusUpdatedEvent extends BaseEvent {
   };
 }
 
-export type DomainEvent = 
-  | UserCreatedEvent 
-  | UserUpdatedEvent 
-  | ProductCreatedEvent 
-  | ProductStockUpdatedEvent 
-  | OrderCreatedEvent 
+export type DomainEvent =
+  | UserCreatedEvent
+  | UserUpdatedEvent
+  | ProductCreatedEvent
+  | ProductStockUpdatedEvent
+  | OrderCreatedEvent
   | OrderStatusUpdatedEvent;

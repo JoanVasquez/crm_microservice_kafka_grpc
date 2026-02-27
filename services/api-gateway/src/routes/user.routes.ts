@@ -1,23 +1,28 @@
-import { Router } from 'express';
-import { body } from 'express-validator';
-import { UserController } from '../controllers/user.controller';
-import { validateRequest } from '../middleware/validate-request';
-import { authenticateToken } from '../middleware/auth';
+import { Router } from "express";
+import { body } from "express-validator";
+import { UserController } from "../controllers/user.controller";
+import { validateRequest } from "../middleware/validate-request";
+import { authenticateToken } from "../middleware/auth";
 
 const router = Router();
 
 const userController = new UserController();
 
-router.get('/:id', authenticateToken, userController.getUser.bind(userController));
+router.get("/:id", authenticateToken, userController.getUser.bind(userController));
 
-router.put('/:id', authenticateToken, [
-    body('email').isEmail().normalizeEmail(),
-    body('firstName').trim().isLength({ min: 2, max: 50 }),
-    body('lastName').trim().isLength({ min: 2, max: 50 }),
-    body('password').isLength({ min: 8 }),
+router.put(
+  "/:id",
+  authenticateToken,
+  [
+    body("email").isEmail().normalizeEmail(),
+    body("firstName").trim().isLength({ min: 2, max: 50 }),
+    body("lastName").trim().isLength({ min: 2, max: 50 }),
+    body("password").isLength({ min: 8 }),
     validateRequest,
-], userController.updateUser.bind(userController));
+  ],
+  userController.updateUser.bind(userController),
+);
 
-router.delete('/:id', authenticateToken, userController.deleteUser.bind(userController));
+router.delete("/:id", authenticateToken, userController.deleteUser.bind(userController));
 
 export { router as userRoutes };

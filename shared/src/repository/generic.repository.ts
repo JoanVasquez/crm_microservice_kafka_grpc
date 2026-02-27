@@ -1,5 +1,5 @@
-import { DataSource, ObjectLiteral, Repository } from 'typeorm';
-import { IRepository } from '../types/IRepository';
+import { DataSource, ObjectLiteral, Repository } from "typeorm";
+import { IRepository } from "../types/IRepository";
 
 export class GenericRepository<T extends ObjectLiteral> implements IRepository<T> {
   protected repo: Repository<T>;
@@ -9,7 +9,7 @@ export class GenericRepository<T extends ObjectLiteral> implements IRepository<T
   }
 
   async create(data: T): Promise<T> {
-    const entity = await this.repo.create(data);
+    const entity = this.repo.create(data);
     return this.repo.save(entity);
   }
 
