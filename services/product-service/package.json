@@ -7,7 +7,9 @@
     "dev": "ts-node-dev --respawn src/index.ts",
     "build": "tsc",
     "generate-proto": "mkdir -p ./src/generated && protoc --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./src/generated --ts_proto_opt=outputServices=grpc-js,esModuleInterop=true,importSuffix=.js --proto_path=./shared/proto ./shared/proto/product.proto",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.9.0",
@@ -25,8 +27,12 @@
     "winston": "^3.10.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/express": "^4.17.17",
     "@types/node": "^20.4.2",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
+    "eslint": "^10.0.2",
     "ts-node-dev": "^2.0.0",
     "ts-proto": "^2.8.1",
     "typescript": "^5.1.6"
