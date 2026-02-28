@@ -3,6 +3,7 @@ import { STATUS_CODES } from "http";
 import jwt from "jsonwebtoken";
 import {
   AuthedUser,
+  AuthError,
   HttpStatus,
   ResponseTemplate,
   UserServiceClient,
@@ -38,7 +39,6 @@ export class AuthController {
         ),
       );
     } catch (error) {
-      console.error("Error registering User", error);
       next(error);
     }
   }
@@ -52,14 +52,12 @@ export class AuthController {
       });
 
       if (!response.valid || !response.user) {
-        res.status(401).json({ error: "Invalid credentials" });
-        return;
+        throw new AuthError("Unauthenticated");
       }
 
       const token = jwt.sign(
         {
           sub: response.user.id,
-          id: response.user.id,
           roles: response.user.roles,
         } as AuthedUser,
         config.jwtSecret,

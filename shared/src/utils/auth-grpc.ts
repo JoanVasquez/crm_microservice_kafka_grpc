@@ -5,7 +5,6 @@ export type Roles = "Admin" | "Customer" | "Guess";
 
 export type AuthedUser = {
   sub: string;
-  id: string;
   roles: Roles[];
 };
 
@@ -27,7 +26,8 @@ export function verifyJwt(token: string): AuthedUser {
   const payload = jwt.verify(token, JWT_SECRET) as AuthedUser;
   return {
     sub: String(payload.sub),
-    id: payload.id,
     roles: Array.isArray(payload.roles) ? payload.roles : [],
   };
 }
+
+export function requiredRoles() { }
