@@ -7,9 +7,11 @@ import {
   CreateUserRequest,
   DeleteUserRequest,
   DeleteUserResponse,
+  GetUserByEmailRequest,
   GetUserRequest,
   grpcServiceError,
   mapGrpcResponse,
+  toServiceError,
   UpdateUserRequest,
   UserResponse,
   ValidateUserRequest,
@@ -30,12 +32,13 @@ export class UserController {
         lastName: call.request.lastName,
         email: call.request.email,
         password: call.request.password,
+        roles: call.request.roles,
       } as CreateUserDto);
 
       const userResponse: UserResponse = this.mapUserResponse(createdUser);
       callback(null, mapGrpcResponse(userResponse));
     } catch (error) {
-      callback(grpcServiceError(status.INVALID_ARGUMENT, (error as Error).message));
+      callback(toServiceError(error));
     }
   }
 
@@ -45,6 +48,23 @@ export class UserController {
   ): Promise<void> {
     try {
       const user: User | null = await this.userService.getUserById(call.request.id);
+      if (!user) {
+        return callback(grpcServiceError(status.NOT_FOUND, "User not found"));
+      }
+
+      const userResponse: UserResponse = this.mapUserResponse(user);
+      callback(null, mapGrpcResponse(userResponse));
+    } catch (error) {
+      callback(toServiceError(error));
+    }
+  }
+
+  async GetUserByEmail(
+    call: ServerUnaryCall<GetUserByEmailRequest, UserResponse>,
+    callback: sendUnaryData<UserResponse>,
+  ): Promise<void> {
+    try {
+      const user: User | null = await this.userService.getUserByEmail(call.request.email);
       if (!user) {
         return callback(grpcServiceError(status.NOT_FOUND, "User not found"));
       }
@@ -123,6 +143,7 @@ export class UserController {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
+      roles: user.roles,
       isActive: user.isActive,
       createdAt: user.createdAt.toString(),
       updatedAt: user.updatedAt.toString(),

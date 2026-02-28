@@ -5,6 +5,7 @@ package user;
 service UserService {
   rpc GetUser (GetUserRequest) returns (UserResponse);
   rpc CreateUser (CreateUserRequest) returns (UserResponse);
+  rpc GetUserByEmail(GetUserByEmailRequest) returns (UserResponse);
   rpc UpdateUser (UpdateUserRequest) returns (UserResponse);
   rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse);
   rpc ValidateUser (ValidateUserRequest) returns (ValidateUserResponse);
@@ -14,11 +15,16 @@ message GetUserRequest {
   string id = 1;
 }
 
+message GetUserByEmailRequest {
+  string email = 1;
+}
+
 message CreateUserRequest {
   string email = 1;
   string firstName = 2;
   string lastName = 3;
   string password = 4;
+  repeated string roles = 5;
 }
 
 message UpdateUserRequest {
@@ -26,6 +32,7 @@ message UpdateUserRequest {
   optional string firstName = 2;
   optional string lastName = 3;
   optional bool isActive = 4;
+  repeated string roles = 5;
 }
 
 message DeleteUserRequest {
@@ -45,6 +52,7 @@ message UserResponse {
   bool isActive = 5;
   string createdAt = 6;
   string updatedAt = 7;
+  repeated string roles = 8;
 }
 
 message DeleteUserResponse {

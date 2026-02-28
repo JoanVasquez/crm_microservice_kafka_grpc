@@ -38,7 +38,7 @@ export class KafkaMessagingService implements IMessagingService {
         await this.producer.connect();
         this.isProducerConnected = true;
         console.log("✅ Kafka producer connected");
-      } catch (error) {
+      } catch (error: unknown) {
         console.error("❌ Failed to connect Kafka producer:", error);
         if (!(error instanceof KafkaJSNonRetriableError)) {
           console.warn("🔁 Retrying Kafka producer connection in 5s...");
@@ -57,7 +57,10 @@ export class KafkaMessagingService implements IMessagingService {
     if (this.reconnectInterval) return;
     this.reconnectInterval = setTimeout(async () => {
       this.reconnectInterval = null;
-      await this.connectProducer();
+      await this.connectProducer().catch((error: unknown) => {
+        const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
+        console.log("Kafka reconnect failed:", errorMessage);
+      });
     }, 5000);
   }
 
@@ -65,7 +68,7 @@ export class KafkaMessagingService implements IMessagingService {
     if (!this.isProducerConnected) {
       // Conexión lazy
       console.warn("⚠️ Kafka producer not connected, attempting lazy connect...");
-      await this.connectProducer().catch(console.error);
+      await this.connectProducer();
       if (!this.isProducerConnected) return; // Si falla, no bloqueamos
     }
 
@@ -79,8 +82,9 @@ export class KafkaMessagingService implements IMessagingService {
       ]);
 
       console.log(`✅ Event published to ${topic}`);
-    } catch (error: any) {
-      console.error("❌ Failed to publish Kafka event:", error.message || error);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error("❌ Failed to publish Kafka event:", message);
       this.isProducerConnected = false;
       this.scheduleReconnect();
     }

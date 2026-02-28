@@ -52,6 +52,7 @@ async function startServer() {
       CreateUser: userController.CreateUser.bind(userController),
       GetUser: userController.GetUser.bind(userController),
       ValidateUser: userController.ValidateUser.bind(userController),
+      GetUserByEmail: userController.GetUserByEmail.bind(userController),
       UpdateUser: userController.UpdateUser.bind(userController),
       DeleteUser: userController.DeleteUser.bind(userController),
     });

@@ -1,4 +1,5 @@
 import { config } from "../config/config";
+import { Roles } from "../utils/auth-grpc";
 import { GrpcService } from "../utils/grpc-service";
 
 export interface CreateUserRequest {
@@ -6,6 +7,11 @@ export interface CreateUserRequest {
   firstName: string;
   lastName: string;
   password: string;
+  roles: Roles[];
+}
+
+export interface GetUserByEmailRequest {
+  email: string;
 }
 
 export interface ValidateUserRequest {
@@ -13,17 +19,40 @@ export interface ValidateUserRequest {
   password: string;
 }
 
-export interface UserResponse {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  isActive: boolean;
-}
-
 export interface ValidateUserResponse {
   valid: boolean;
   user?: UserResponse;
+}
+
+export interface GetUserRequest {
+  id: string;
+}
+
+export interface UpdateUserRequest {
+  id: string;
+  firstName?: string;
+  lastName?: string;
+  isActive?: boolean;
+  roles: Roles[];
+}
+
+export interface DeleteUserRequest {
+  id: string;
+}
+
+export interface DeleteUserResponse {
+  success: boolean;
+}
+
+export interface UserResponse {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  isActive: boolean;
+  roles: Roles[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export class UserServiceClient {
@@ -49,6 +78,10 @@ export class UserServiceClient {
 
   async getUser(id: string): Promise<UserResponse> {
     return this.grpcService.call<UserResponse>("GetUser", { id });
+  }
+
+  async getUserByEmail(email: string): Promise<UserResponse> {
+    return this.grpcService.call<UserResponse>("GetUserByEmail", { email });
   }
 
   async updateUser(id: string, request: CreateUserRequest): Promise<UserResponse> {

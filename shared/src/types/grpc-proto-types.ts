@@ -1,5 +1,6 @@
 export type GrpcProtoUserMethods =
   | "GetUser"
+  | "GetUserByEmail"
   | "CreateUser"
   | "UpdateUser"
   | "DeleteUser"

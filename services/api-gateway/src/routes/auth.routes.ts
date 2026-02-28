@@ -13,6 +13,8 @@ router.post(
     body("firstName").trim().isLength({ min: 2, max: 50 }),
     body("lastName").trim().isLength({ min: 2, max: 50 }),
     body("password").isLength({ min: 8 }),
+    body("roles").isArray({ min: 1 }),
+    body("roles.*").isString(),
     validateRequest,
   ],
   authController.register.bind(authController),

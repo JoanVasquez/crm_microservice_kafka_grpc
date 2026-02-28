@@ -9,7 +9,7 @@ import {
 import { CreateUserDto, UpdateUserDto } from "../dtos/user.dto";
 import { User } from "../entities/user.entity";
 import bcrypt from "bcryptjs";
-import { randomUUID } from "crypto";
+// import { randomUUID } from "crypto";
 import { UserRepository } from "../repository/user.repository.impl";
 
 @injectable()
@@ -71,6 +71,24 @@ export class UserService {
       this.cacheService
         .set(`user:${user.id}`, user, 3600)
         .catch((error) => console.warn("⚠️ Background cache set failed:", error.message));
+    }
+
+    return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | null> {
+    const cachedUser = await this.cacheService.get<User>(`user:${email}`).catch(() => null);
+
+    if (cachedUser) {
+      console.log("User retrieved from cache");
+      return cachedUser;
+    }
+
+    const user = await this.userRepository.findByEmail(email);
+    if (user) {
+      this.cacheService
+        .set(`user:${user.email}`, user, 3600)
+        .catch((error) => console.log("Background cache set failed", error.message));
     }
 
     return user;

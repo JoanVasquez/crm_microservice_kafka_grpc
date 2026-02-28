@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
-import { UserServiceClient } from "shared/dist";
+import { NextFunction, Request, Response } from "express";
+import { HttpStatus, ResponseTemplate, UserServiceClient } from "shared/dist";
 
 export class UserController {
   private userService: UserServiceClient;
@@ -8,30 +8,80 @@ export class UserController {
     this.userService = new UserServiceClient();
   }
 
-  async getUser(req: Request, res: Response): Promise<void> {
-    const userId = req.params.id;
+  async getUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = req.params.id;
+      const user = await this.userService.getUser(userId);
 
-    const user = await this.userService.getUser(userId);
-    res.json(user);
+      res.status(HttpStatus.OK.code).send(
+        new ResponseTemplate(HttpStatus.OK.code, HttpStatus.OK.status, HttpStatus.OK.description, {
+          user,
+        }),
+      );
+    } catch (error) {
+      next(error);
+    }
   }
 
-  async updateUser(req: Request, res: Response): Promise<void> {
-    const userId = req.params.id;
-    const { email, firstName, lastName, password } = req.body;
+  async getUserByEmail(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userEmail = req.params.email;
+      const user = await this.userService.getUserByEmail(userEmail);
 
-    const updatedUser = await this.userService.updateUser(userId, {
-      email,
-      firstName,
-      lastName,
-      password,
-    });
-    res.json(updatedUser);
+      res.status(HttpStatus.OK.code).send(
+        new ResponseTemplate(HttpStatus.OK.code, HttpStatus.OK.status, HttpStatus.OK.description, {
+          user,
+        }),
+      );
+    } catch (error) {
+      next(error);
+    }
   }
 
-  async deleteUser(req: Request, res: Response): Promise<void> {
-    const userId = req.params.id;
+  async updateUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = req.params.id;
+      const { email, firstName, lastName, password, roles } = req.body;
+      const updatedUser = await this.userService.updateUser(userId, {
+        email,
+        firstName,
+        lastName,
+        password,
+        roles,
+      });
 
-    await this.userService.deleteUser(userId);
-    res.status(204).send();
+      res
+        .status(HttpStatus.OK.code)
+        .send(
+          new ResponseTemplate(
+            HttpStatus.OK.code,
+            HttpStatus.OK.status,
+            HttpStatus.OK.description,
+            { updatedUser },
+          ),
+        );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = req.params.id;
+      const isDeleted = await this.userService.deleteUser(userId);
+
+      res
+        .status(HttpStatus.OK.code)
+        .send(
+          new ResponseTemplate(
+            HttpStatus.OK.code,
+            HttpStatus.OK.status,
+            HttpStatus.OK.description,
+            { isDeleted },
+          ),
+        );
+    } catch (error) {
+      next(next);
+    }
   }
 }

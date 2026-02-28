@@ -1,6 +1,6 @@
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
-import { GrpcServiceKey, GrpcServices } from "../types/GrpcProtoTypes";
+import { GrpcServiceKey, GrpcServices } from "../types/grpc-proto-types";
 
 export class GrpcClient {
   static async getClient(
@@ -9,7 +9,7 @@ export class GrpcClient {
     proto_path: string,
     serviceHost: string,
     servicePort: number,
-  ): Promise<any> {
+  ): Promise<grpc.Client> {
     console.log(`🔍 Loading proto from: ${proto_path}`);
     console.log(
       `🔗 Creating new connection to ${serviceName} service at ${serviceHost}:${servicePort}`,
@@ -24,13 +24,19 @@ export class GrpcClient {
         oneofs: true,
       });
 
-      const protoDescriptor = grpc.loadPackageDefinition(packageDefinition) as any;
+      const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 
-      if (!protoDescriptor[serviceName] || !protoDescriptor[serviceName][serviceKey]) {
+      const serviceNamespace = protoDescriptor[serviceName] as unknown;
+      if (!serviceNamespace || typeof serviceNamespace !== "object") {
+        throw new Error(`Service namespace ${serviceName} not found in proto definition`);
+      }
+
+      const typedNamespace = serviceNamespace as Record<string, grpc.ServiceClientConstructor>;
+      if (!typedNamespace[serviceKey]) {
         throw new Error(`Service ${serviceKey} not found in proto definition for ${serviceName}`);
       }
 
-      const ServiceConstructor = protoDescriptor[serviceName][serviceKey];
+      const ServiceConstructor = typedNamespace[serviceKey];
 
       const client = new ServiceConstructor(
         `${serviceHost}:${servicePort}`,

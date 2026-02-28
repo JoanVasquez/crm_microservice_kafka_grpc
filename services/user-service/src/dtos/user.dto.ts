@@ -1,4 +1,5 @@
-import { IsEmail, IsString, MinLength, IsOptional, IsBoolean } from "class-validator";
+import { IsEmail, IsString, MinLength, IsOptional, IsBoolean, IsArray } from "class-validator";
+import { Roles } from "shared/dist";
 
 export class CreateUserDto {
   @IsEmail()
@@ -15,6 +16,10 @@ export class CreateUserDto {
   @IsString()
   @MinLength(8)
   password!: string;
+
+  @IsArray()
+  @MinLength(1)
+  roles!: Roles[];
 }
 
 export class UpdateUserDto {

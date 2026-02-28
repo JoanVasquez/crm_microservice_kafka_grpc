@@ -1,39 +1,32 @@
 import { Request, Response, NextFunction } from "express";
+import {
+  CustomError,
+  DatabaseError,
+  DuplicateRecordError,
+  ForeignKeyViolationError,
+  HttpStatus,
+  ResponseTemplate,
+} from "shared/dist";
 
-export const errorHandler = (error: any, req: Request, res: Response, _: NextFunction): void => {
-  console.error("API Gateway Error:", {
-    error: error.message,
-    url: req.url,
-    method: req.method,
-  });
-
-  // Handle gRPC specific errors
-  if (error.code !== undefined) {
-    // Special case: code 3 with "client closed" message
-    if (error.code === 3 && error.message.includes("The client is closed")) {
-      res.status(503).json({ error: "Service connection issue, please try again" });
-      return;
-    }
-
-    switch (error.code) {
-      case 3: // INVALID_ARGUMENT
-        res.status(400).json({ error: error.details || "Invalid request" });
-        return;
-      case 5: // NOT_FOUND
-        res.status(404).json({ error: "Resource not found" });
-        return;
-      case 6: // ALREADY_EXISTS
-        res.status(409).json({ error: "Resource already exists" });
-        return;
-      case 14: // UNAVAILABLE
-        res.status(503).json({ error: "Service temporarily unavailable" });
-        return;
-      default:
-        res.status(500).json({ error: "Service error" });
-        return;
-    }
+export const errorHandler = (
+  error: unknown,
+  req: Request,
+  res: Response,
+  _: NextFunction,
+): Response<unknown, Record<string, unknown>> | void => {
+  if (error instanceof CustomError) {
+    return res
+      .status(error.statusCode)
+      .send(new ResponseTemplate(error.statusCode, error.status, error.message));
   }
 
-  // Default error
-  res.status(500).json({ error: "Internal server error" });
+  return res
+    .status(HttpStatus.INTERNAL_SERVER_ERROR.code)
+    .send(
+      new ResponseTemplate(
+        HttpStatus.INTERNAL_SERVER_ERROR.code,
+        HttpStatus.INTERNAL_SERVER_ERROR.status,
+        HttpStatus.INTERNAL_SERVER_ERROR.description,
+      ),
+    );
 };

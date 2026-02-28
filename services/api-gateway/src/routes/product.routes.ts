@@ -21,9 +21,9 @@ router.post(
   productController.createProduct.bind(productController),
 );
 
-router.get("/", productController.getProducts.bind(productController));
+router.get("/", authenticateToken, productController.getProducts.bind(productController));
 
-router.get("/:id", productController.getProduct.bind(productController));
+router.get("/:id", authenticateToken, productController.getProduct.bind(productController));
 
 router.put(
   "/:id",

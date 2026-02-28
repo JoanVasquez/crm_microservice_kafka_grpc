@@ -18,7 +18,7 @@ export interface UserUpdatedEvent extends BaseEvent {
   type: "user.updated";
   data: {
     userId: string;
-    changes: Record<string, any>;
+    changes: Record<string, unknown>;
   };
 }
 

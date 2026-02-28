@@ -5,8 +5,13 @@ import {
   GrpcProtoUserMethods,
   GrpcServiceKey,
   GrpcServices,
-} from "../types/GrpcProtoTypes";
+} from "../types/grpc-proto-types";
 import { GrpcClient } from "./grpc-client";
+
+type GrpcUnaryMethod<TRequest, TResponse> = (
+  request: TRequest,
+  callback: (error: Error | null, response: TResponse) => void,
+) => void;
 
 export class GrpcService {
   constructor(
@@ -17,15 +22,15 @@ export class GrpcService {
     private port: number,
   ) { }
 
-  async call<T>(
+  async call<TResponse, TRequest = unknown>(
     method:
       | GrpcProtoUserMethods
       | GrpcProtoProductMethods
       | GrpcProtoOrderMethods
       | GrpcProtoNotificationMethods,
-    request: any,
+    request: TRequest,
     timeoutMs: number = 10000,
-  ): Promise<T> {
+  ): Promise<TResponse> {
     const client = await GrpcClient.getClient(
       this.serviceName,
       this.serviceKey,
@@ -34,12 +39,19 @@ export class GrpcService {
       this.port,
     );
 
-    return new Promise<T>((resolve, reject) => {
+    return new Promise<TResponse>((resolve, reject) => {
       const timeoutId = setTimeout(() => {
         reject(new Error(`gRPC call timeout after ${timeoutMs}ms`));
       }, timeoutMs);
 
-      client[method](request, (error: any, response: any) => {
+      const methodFn = (client as unknown as Record<string, unknown>)[method];
+      if (typeof methodFn !== "function") {
+        clearTimeout(timeoutId);
+        reject(new Error(`Method ${method} not found on gRPC client`));
+        return;
+      }
+
+      (methodFn as GrpcUnaryMethod<TRequest, TResponse>)(request, (error, response) => {
         clearTimeout(timeoutId);
 
         if (error) {

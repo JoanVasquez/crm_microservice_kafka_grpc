@@ -1,3 +1,4 @@
+import { Roles } from "shared/dist";
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -22,6 +23,9 @@ export class User {
 
   @Column()
   password!: string;
+
+  @Column()
+  roles!: Roles[];
 
   @Column({ default: true })
   isActive!: boolean;
