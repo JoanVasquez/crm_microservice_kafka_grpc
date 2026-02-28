@@ -10,6 +10,7 @@ import {
   GetUserByEmailRequest,
   GetUserRequest,
   grpcServiceError,
+  HttpStatus,
   mapGrpcResponse,
   toServiceError,
   UpdateUserRequest,
@@ -47,11 +48,7 @@ export class UserController {
     callback: sendUnaryData<UserResponse>,
   ): Promise<void> {
     try {
-      const user: User | null = await this.userService.getUserById(call.request.id);
-      if (!user) {
-        return callback(grpcServiceError(status.NOT_FOUND, "User not found"));
-      }
-
+      const user = await this.userService.getUserById(call.request.id);
       const userResponse: UserResponse = this.mapUserResponse(user);
       callback(null, mapGrpcResponse(userResponse));
     } catch (error) {
@@ -64,37 +61,28 @@ export class UserController {
     callback: sendUnaryData<UserResponse>,
   ): Promise<void> {
     try {
-      const user: User | null = await this.userService.getUserByEmail(call.request.email);
-      if (!user) {
-        return callback(grpcServiceError(status.NOT_FOUND, "User not found"));
-      }
-
+      const user = await this.userService.getUserByEmail(call.request.email);
       const userResponse: UserResponse = this.mapUserResponse(user);
       callback(null, mapGrpcResponse(userResponse));
     } catch (error) {
-      callback(grpcServiceError(status.INVALID_ARGUMENT, (error as Error).message));
+      callback(toServiceError(error));
     }
   }
-
   async ValidateUser(
     call: ServerUnaryCall<ValidateUserRequest, ValidateUserResponse>,
     callback: sendUnaryData<ValidateUserResponse>,
   ): Promise<void> {
     try {
-      const user: User | null = await this.userService.validateUser(
-        call.request.email,
-        call.request.password,
-      );
-
-      const userResponse: UserResponse | undefined = user ? this.mapUserResponse(user) : undefined;
+      const user = await this.userService.validateUser(call.request.email, call.request.password);
+      const userResponse = this.mapUserResponse(user);
       const validResponse: ValidateUserResponse = {
-        valid: user ? true : false,
+        valid: true,
         user: userResponse,
       };
 
       callback(null, mapGrpcResponse(validResponse));
     } catch (error) {
-      callback(grpcServiceError(status.INVALID_ARGUMENT, (error as Error).message));
+      callback(toServiceError(error));
     }
   }
 
@@ -103,21 +91,16 @@ export class UserController {
     callback: sendUnaryData<UserResponse>,
   ): Promise<void> {
     try {
-      const user: User | null = await this.userService.updateUser(call.request.id, {
+      const user = await this.userService.updateUser(call.request.id, {
         firstName: call.request.firstName,
         lastName: call.request.lastName,
         isActive: call.request.isActive,
       } as UpdateUserDto);
-
-      if (!user) {
-        return callback(grpcServiceError(status.NOT_FOUND, "User not found"));
-      }
-
       const userResponse: UserResponse = this.mapUserResponse(user);
 
       callback(null, mapGrpcResponse(userResponse));
     } catch (error) {
-      callback(grpcServiceError(status.INVALID_ARGUMENT, (error as Error).message));
+      callback(toServiceError(error));
     }
   }
 
@@ -126,14 +109,10 @@ export class UserController {
     callback: sendUnaryData<DeleteUserResponse>,
   ): Promise<void> {
     try {
-      const result: boolean = await this.userService.deleteUser(call.request.id);
-      if (!result) {
-        return callback(grpcServiceError(status.NOT_FOUND, "User not found"));
-      }
-
-      callback(null, { success: true } as DeleteUserResponse);
+      const result = await this.userService.deleteUser(call.request.id);
+      callback(null, { success: result } as DeleteUserResponse);
     } catch (error) {
-      callback(grpcServiceError(status.INVALID_ARGUMENT, (error as Error).message));
+      callback(toServiceError(error));
     }
   }
 

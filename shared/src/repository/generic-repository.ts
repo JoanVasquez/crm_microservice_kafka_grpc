@@ -26,9 +26,9 @@ export class GenericRepository<T extends ObjectLiteral> implements IRepository<T
     }
   }
 
-  async findById(id: string): Promise<T | null> {
+  async findById(id: string): Promise<T> {
     try {
-      const entity = this.repo.findOneBy({ id } as unknown as FindOptionsWhere<T>);
+      const entity = await this.repo.findOneBy({ id } as unknown as FindOptionsWhere<T>);
       if (!entity) throw new NotFoundError("Entity");
       return entity;
     } catch (error: unknown) {
@@ -38,7 +38,7 @@ export class GenericRepository<T extends ObjectLiteral> implements IRepository<T
     }
   }
 
-  async update(id: string, data: Partial<T>): Promise<T | null> {
+  async update(id: string, data: Partial<T>): Promise<T> {
     try {
       const updatedResult = await this.repo.update(id, data);
 

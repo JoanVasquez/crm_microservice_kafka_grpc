@@ -1,6 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { IUserRepository } from "../repository/IUserRepository";
 import {
+  AuthError,
   ICacheService,
   // IRepository,
   // UserCreatedEvent,
@@ -58,7 +59,7 @@ export class UserService {
     return user;
   }
 
-  async getUserById(id: string): Promise<User | null> {
+  async getUserById(id: string): Promise<User> {
     const cachedUser = await this.cacheService.get<User>(`user:${id}`).catch(() => null);
 
     if (cachedUser) {
@@ -76,7 +77,7 @@ export class UserService {
     return user;
   }
 
-  async getUserByEmail(email: string): Promise<User | null> {
+  async getUserByEmail(email: string): Promise<User> {
     const cachedUser = await this.cacheService.get<User>(`user:${email}`).catch(() => null);
 
     if (cachedUser) {
@@ -94,17 +95,16 @@ export class UserService {
     return user;
   }
 
-  async validateUser(email: string, password: string): Promise<User | null> {
+  async validateUser(email: string, password: string): Promise<User> {
     const user = await this.userRepository.findByEmail(email);
-    if (!user || !user.isActive) {
-      return null;
-    }
-
     const isValid = await bcrypt.compare(password, user.password);
-    return isValid ? user : null;
+
+    if (!user.isActive) throw new AuthError("User Inactive");
+    if (!isValid) throw new AuthError("Invalid password");
+    return user;
   }
 
-  async updateUser(id: string, userData: UpdateUserDto): Promise<User | null> {
+  async updateUser(id: string, userData: UpdateUserDto): Promise<User> {
     const user = await this.userRepository.update(id, userData);
     if (user) {
       this.cacheService

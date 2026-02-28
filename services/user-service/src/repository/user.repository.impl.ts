@@ -16,7 +16,7 @@ export class UserRepository extends GenericRepository<User> implements IUserRepo
     super(dataSource, User);
   }
 
-  async findByEmail(email: string): Promise<User | null> {
+  async findByEmail(email: string): Promise<User> {
     try {
       const user = await this.userRepository.findOne({ where: { email } });
 
@@ -24,7 +24,7 @@ export class UserRepository extends GenericRepository<User> implements IUserRepo
       return user;
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
-      throw new DatabaseError("Error finding user by email", errorMessage);
+      throw new DatabaseError(`Error finding user by email ${errorMessage}`);
     }
   }
 }

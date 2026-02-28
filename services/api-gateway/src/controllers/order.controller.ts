@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
-import { OrderServiceClient } from "shared";
+import { NextFunction, Request, Response } from "express";
+import { HttpStatus, OrderServiceClient, ResponseTemplate } from "shared";
 
 export class OrderController {
   private orderService: OrderServiceClient;
@@ -8,24 +8,65 @@ export class OrderController {
     this.orderService = new OrderServiceClient();
   }
 
-  async createOrder(req: Request, res: Response): Promise<void> {
-    const { userId, items } = req.body;
-    const newOrder = await this.orderService.createOrder({
-      userId,
-      items,
-    });
-    res.status(201).json(newOrder);
+  async createOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { userId, items } = req.body;
+      const newOrder = await this.orderService.createOrder({
+        userId,
+        items,
+      });
+
+      res.status(HttpStatus.CREATED.code).send(
+        new ResponseTemplate(
+          HttpStatus.CREATED.code,
+          HttpStatus.CREATED.status,
+          HttpStatus.CREATED.description,
+          {
+            newOrder,
+          },
+        ),
+      );
+    } catch (error) {
+      next(error);
+    }
   }
 
-  async getOrderById(req: Request, res: Response): Promise<void> {
-    const { id } = req.params;
-    const order = await this.orderService.getOrderById(id);
-    res.status(200).json(order);
-  }
+  async getOrderById(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id } = req.params;
+      const order = await this.orderService.getOrderById(id);
 
-  async getOrdersByUserId(req: Request, res: Response): Promise<void> {
-    const { userId } = req.params;
-    const orders = await this.orderService.getOrdersByUserId(userId);
-    res.status(200).json(orders);
+      res
+        .status(HttpStatus.OK.code)
+        .send(
+          new ResponseTemplate(
+            HttpStatus.OK.code,
+            HttpStatus.OK.status,
+            HttpStatus.OK.description,
+            { order },
+          ),
+        );
+    } catch (error) {
+      next(error);
+    }
+  }
+  async getOrdersByUserId(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { userId } = req.params;
+      const orders = await this.orderService.getOrdersByUserId(userId);
+
+      res
+        .status(HttpStatus.OK.code)
+        .send(
+          new ResponseTemplate(
+            HttpStatus.OK.code,
+            HttpStatus.OK.status,
+            HttpStatus.OK.description,
+            { orders },
+          ),
+        );
+    } catch (error) {
+      next(error);
+    }
   }
 }
