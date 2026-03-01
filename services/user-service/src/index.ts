@@ -13,6 +13,7 @@ import { register } from "shared/dist/utils/metrics";
 import { UserController } from "./controller/user.controller";
 import { registerDependencies } from "./containers";
 import { initializeDatabase } from "./config/database";
+import { authUnaryInterceptor, wrapUnary } from "shared/dist";
 
 const PROTO_PATH = "/app/shared/proto/user.proto";
 type UserGrpcNamespace = {
@@ -23,13 +24,9 @@ type UserGrpcNamespace = {
 
 async function startServer() {
   try {
-    // 1. Initialize database first
     await initializeDatabase();
-
-    // 2. Register dependencies
     await registerDependencies();
 
-    // Load the protobuf
     const packageDefinition = loadSync(PROTO_PATH, {
       keepCase: true,
       longs: String,
@@ -44,17 +41,27 @@ async function startServer() {
       throw new Error("UserService definition not found in loaded proto");
     }
     const server = new Server();
-
-    // Get UserController from container (it will have RedisCacheService injected)
     const userController: UserController = container.resolve(UserController);
 
     server.addService(userProto.UserService.service, {
       CreateUser: userController.CreateUser.bind(userController),
-      GetUser: userController.GetUser.bind(userController),
+      GetUser: wrapUnary(
+        userController.GetUser.bind(userController),
+        authUnaryInterceptor(["Admin", "Customer"]),
+      ),
       ValidateUser: userController.ValidateUser.bind(userController),
-      GetUserByEmail: userController.GetUserByEmail.bind(userController),
-      UpdateUser: userController.UpdateUser.bind(userController),
-      DeleteUser: userController.DeleteUser.bind(userController),
+      GetUserByEmail: wrapUnary(
+        userController.GetUserByEmail.bind(userController),
+        authUnaryInterceptor(["Admin", "Customer"]),
+      ),
+      UpdateUser: wrapUnary(
+        userController.UpdateUser.bind(userController),
+        authUnaryInterceptor(["Admin", "Customer"]),
+      ),
+      DeleteUser: wrapUnary(
+        userController.DeleteUser.bind(userController),
+        authUnaryInterceptor(["Admin"]),
+      ),
     });
 
     register.setDefaultLabels({ service: "user-service" });

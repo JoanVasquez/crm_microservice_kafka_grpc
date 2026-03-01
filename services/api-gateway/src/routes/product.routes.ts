@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { body } from "express-validator";
 import { validateRequest } from "../middleware/validate-request";
-import { authenticateToken } from "../middleware/auth";
+import { authenticateToken, authorize } from "../middleware/auth";
 import { ProductController } from "../controllers/product.controller";
 
 const router = Router();
@@ -11,6 +11,7 @@ const productController = new ProductController();
 router.post(
   "/",
   authenticateToken,
+  authorize(["Admin", "Supplier"]),
   [
     body("name").trim().isLength({ min: 2, max: 100 }),
     body("description").trim().isLength({ min: 10, max: 1000 }),
@@ -21,13 +22,24 @@ router.post(
   productController.createProduct.bind(productController),
 );
 
-router.get("/", authenticateToken, productController.getProducts.bind(productController));
+router.get(
+  "/",
+  authenticateToken,
+  authorize(["Admin", "Supplier", "Customer"]),
+  productController.getProducts.bind(productController),
+);
 
-router.get("/:id", authenticateToken, productController.getProduct.bind(productController));
+router.get(
+  "/:id",
+  authenticateToken,
+  authorize(["Admin", "Supplier", "Customer"]),
+  productController.getProduct.bind(productController),
+);
 
 router.put(
   "/:id",
   authenticateToken,
+  authorize(["Admin", "Supplier"]),
   [
     body("name").optional().trim().isLength({ min: 2, max: 100 }),
     body("description").optional().trim().isLength({ min: 10, max: 1000 }),
@@ -41,10 +53,16 @@ router.put(
 router.patch(
   "/:id/stock",
   authenticateToken,
+  authorize(["Admin", "Supplier"]),
   [body("quantity").isInt({ gt: -1 }), validateRequest],
   productController.updateStock.bind(productController),
 );
 
-router.delete("/:id", authenticateToken, productController.deleteProduct.bind(productController));
+router.delete(
+  "/:id",
+  authenticateToken,
+  authorize(["Admin", "Supplier"]),
+  productController.deleteProduct.bind(productController),
+);
 
 export { router as productRoutes };

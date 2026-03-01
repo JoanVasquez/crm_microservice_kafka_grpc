@@ -7,6 +7,7 @@ import { ProductController } from "./controller/product.controller";
 import { registerDependencies } from "./containers";
 import { initializeDatabase } from "./config/database";
 import { OrderConsumer } from "./config/order.consumer";
+import { authUnaryInterceptor, wrapUnary } from "shared/dist";
 
 const PROTO_PATH = "/app/shared/proto/product.proto";
 
@@ -48,12 +49,30 @@ async function startServer() {
     const productController: ProductController = container.resolve(ProductController);
 
     server.addService(productProto.ProductService.service, {
-      GetProduct: productController.GetProduct.bind(productController),
-      CreateProduct: productController.CreateProduct.bind(productController),
-      UpdateProduct: productController.UpdateProduct.bind(productController),
-      DeleteProduct: productController.DeleteProduct.bind(productController),
-      GetProducts: productController.GetProducts.bind(productController),
-      UpdateStock: productController.UpdateStock.bind(productController),
+      GetProduct: wrapUnary(
+        productController.GetProduct.bind(productController),
+        authUnaryInterceptor(["Admin", "Supplier", "Customer"]),
+      ),
+      CreateProduct: wrapUnary(
+        productController.CreateProduct.bind(productController),
+        authUnaryInterceptor(["Admin", "Supplier"]),
+      ),
+      UpdateProduct: wrapUnary(
+        productController.UpdateProduct.bind(productController),
+        authUnaryInterceptor(["Admin", "Supplier"]),
+      ),
+      DeleteProduct: wrapUnary(
+        productController.DeleteProduct.bind(productController),
+        authUnaryInterceptor(["Admin", "Supplier"]),
+      ),
+      GetProducts: wrapUnary(
+        productController.GetProducts.bind(productController),
+        authUnaryInterceptor(["Admin", "Supplier", "Customer"]),
+      ),
+      UpdateStock: wrapUnary(
+        productController.UpdateStock.bind(productController),
+        authUnaryInterceptor(["Admin", "Supplier"]),
+      ),
     });
 
     register.setDefaultLabels({ service: "product-service" });

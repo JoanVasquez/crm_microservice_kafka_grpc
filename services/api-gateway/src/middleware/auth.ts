@@ -40,7 +40,7 @@ export const authorize = (roles: Roles[]): RequestHandler => {
     if (!req.token) throw new AuthError("Unauthorized");
     const decoded = jwt.verify(req.token, config.jwtSecret) as AuthedUser;
 
-    const shouldAllowReq = roles.every((role) => decoded.roles.includes(role));
+    const shouldAllowReq = roles.some((role) => decoded.roles.includes(role));
     if (!shouldAllowReq) throw new AuthError("Insufficient permissions");
     next();
   };

@@ -6,6 +6,7 @@ import { register } from "shared/dist/utils/metrics";
 import { registerDependencies } from "./containers";
 import { initializeDatabase } from "./config/database";
 import { OrderController } from "./controller/order.controller";
+import { authUnaryInterceptor, wrapUnary } from "shared/dist";
 
 const PROTO_PATH = "/app/shared/proto/order.proto";
 
@@ -28,9 +29,18 @@ async function startServer() {
     const orderController: OrderController = container.resolve(OrderController);
 
     server.addService(orderProto.OrderService.service, {
-      CreateOrder: orderController.CreateOrder.bind(orderController),
-      GetOrder: orderController.GetOrder.bind(orderController),
-      GetUserOrders: orderController.GetUserOrders.bind(orderController),
+      CreateOrder: wrapUnary(
+        orderController.CreateOrder.bind(orderController),
+        authUnaryInterceptor(["Customer"]),
+      ),
+      GetOrder: wrapUnary(
+        orderController.GetOrder.bind(orderController),
+        authUnaryInterceptor(["Admin"]),
+      ),
+      GetUserOrders: wrapUnary(
+        orderController.GetUserOrders.bind(orderController),
+        authUnaryInterceptor(["Admin", "Customer"]),
+      ),
     });
 
     register.setDefaultLabels({ service: "order-service" });
