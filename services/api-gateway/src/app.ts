@@ -9,7 +9,7 @@ import { orderRoutes } from "./routes/order.routes";
 import { userRoutes } from "./routes/user.routes";
 import { metricsMiddleware } from "./middleware/metrics";
 import { errorHandler } from "./middleware/error-handler";
-import { config, register } from "shared/dist";
+import { config, register } from "shared";
 
 const app = express();
 

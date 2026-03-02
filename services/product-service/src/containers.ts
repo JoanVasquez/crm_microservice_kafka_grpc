@@ -15,9 +15,7 @@ import { ProductRepository } from "./repository/product.repository";
 import { OrderConsumer } from "./config/order.consumer";
 
 export async function registerDependencies(): Promise<void> {
-  container.register<any>("AppDataSource", {
-    useValue: AppDataSource,
-  });
+  container.registerInstance<typeof AppDataSource>("AppDataSource", AppDataSource);
   container.registerSingleton<IRepository<Product>>("ProductRepository", ProductRepository);
   container.registerSingleton<ICacheService>("CacheService", RedisCacheService);
   container.registerSingleton<IMessagingService>("KafkaMessagingService", KafkaMessagingService);

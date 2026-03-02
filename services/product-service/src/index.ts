@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { container } from "tsyringe";
-import { Server, ServerCredentials, loadPackageDefinition } from "@grpc/grpc-js";
+import { GrpcObject, Server, ServerCredentials, ServiceDefinition, UntypedServiceImplementation, loadPackageDefinition } from "@grpc/grpc-js";
 import { loadSync } from "@grpc/proto-loader";
 import { register } from "shared/dist/utils/metrics";
 import { ProductController } from "./controller/product.controller";
@@ -10,6 +10,12 @@ import { OrderConsumer } from "./config/order.consumer";
 import { authUnaryInterceptor, wrapUnary } from "shared/dist";
 
 const PROTO_PATH = "/app/shared/proto/product.proto";
+
+type ProductGrpcPackage = GrpcObject & {
+  ProductService: {
+    service: ServiceDefinition<UntypedServiceImplementation>;
+  };
+};
 
 async function startServer() {
   try {
@@ -43,7 +49,8 @@ async function startServer() {
       oneofs: true,
     });
 
-    const productProto: any = loadPackageDefinition(packageDefinition).product;
+    const loadedDefinition = loadPackageDefinition(packageDefinition);
+    const productProto = loadedDefinition.product as ProductGrpcPackage;
     const server = new Server();
 
     const productController: ProductController = container.resolve(ProductController);

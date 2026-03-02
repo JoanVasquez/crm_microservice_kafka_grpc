@@ -4,12 +4,14 @@ import jwt from "jsonwebtoken";
 import {
   AuthedUser,
   AuthError,
+  CreateUserRequest,
   HttpStatus,
   ResponseTemplate,
   UserServiceClient,
+  ValidateUserRequest,
   ValidateUserResponse,
-} from "shared/dist";
-import { config } from "shared/dist";
+  config,
+} from "shared";
 
 export class AuthController {
   private userService: UserServiceClient;
@@ -18,7 +20,11 @@ export class AuthController {
     this.userService = new UserServiceClient();
   }
 
-  async register(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async register(
+    req: Request<Record<string, never>, unknown, CreateUserRequest>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const { email, firstName, lastName, password, roles } = req.body;
       const user = await this.userService.createUser({
@@ -43,7 +49,11 @@ export class AuthController {
     }
   }
 
-  async login(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async login(
+    req: Request<Record<string, never>, unknown, ValidateUserRequest>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const { email, password } = req.body;
       const response: ValidateUserResponse = await this.userService.validateUser({

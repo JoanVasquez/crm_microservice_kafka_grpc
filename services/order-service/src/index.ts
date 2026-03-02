@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { container } from "tsyringe";
-import { Server, ServerCredentials, loadPackageDefinition } from "@grpc/grpc-js";
+import { GrpcObject, Server, ServerCredentials, ServiceDefinition, UntypedServiceImplementation, loadPackageDefinition } from "@grpc/grpc-js";
 import { loadSync } from "@grpc/proto-loader";
 import { register } from "shared/dist/utils/metrics";
 import { registerDependencies } from "./containers";
@@ -9,6 +9,12 @@ import { OrderController } from "./controller/order.controller";
 import { authUnaryInterceptor, wrapUnary } from "shared/dist";
 
 const PROTO_PATH = "/app/shared/proto/order.proto";
+
+type OrderGrpcPackage = GrpcObject & {
+  OrderService: {
+    service: ServiceDefinition<UntypedServiceImplementation>;
+  };
+};
 
 async function startServer() {
   try {
@@ -23,7 +29,8 @@ async function startServer() {
       oneofs: true,
     });
 
-    const orderProto: any = loadPackageDefinition(packageDefinition).order;
+    const loadedDefinition = loadPackageDefinition(packageDefinition);
+    const orderProto = loadedDefinition.order as OrderGrpcPackage;
     const server = new Server();
 
     const orderController: OrderController = container.resolve(OrderController);

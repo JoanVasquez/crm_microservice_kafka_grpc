@@ -8,9 +8,7 @@ import { OrderService } from "./service/order.service";
 import { OrderController } from "./controller/order.controller";
 
 export async function registerDependencies(): Promise<void> {
-  container.register<any>("AppDataSource", {
-    useValue: AppDataSource,
-  });
+  container.registerInstance<typeof AppDataSource>("AppDataSource", AppDataSource);
   container.registerSingleton<OrderRepository>("OrderRepository", OrderRepository);
   container.registerSingleton<ICacheService>("CacheService", RedisCacheService);
   container.registerSingleton<IMessagingService>("KafkaMessagingService", KafkaMessagingService);

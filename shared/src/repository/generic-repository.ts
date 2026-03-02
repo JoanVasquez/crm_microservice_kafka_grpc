@@ -5,6 +5,14 @@ import { ForeignKeyViolationError } from "../errors/foreign-key-violation-error"
 import { DatabaseError } from "../errors/database-error";
 import { NotFoundError } from "../errors/not-found-error";
 
+type DatabaseDriverError = {
+  code?: string;
+};
+
+function isDatabaseDriverError(error: unknown): error is DatabaseDriverError {
+  return typeof error === "object" && error !== null && "code" in error;
+}
+
 export class GenericRepository<T extends ObjectLiteral> implements IRepository<T> {
   protected repo: Repository<T>;
 
@@ -17,10 +25,12 @@ export class GenericRepository<T extends ObjectLiteral> implements IRepository<T
       const entity = this.repo.create(data);
       return this.repo.save(entity);
     } catch (error: unknown) {
-      const err = error as any;
-
-      if (err?.code === "23505") throw new DuplicateRecordError("Duplicated record"); // postgres
-      if (err?.code === "23503") throw new ForeignKeyViolationError("Foreign key violation");
+      if (isDatabaseDriverError(error) && error.code === "23505") {
+        throw new DuplicateRecordError("Duplicated record");
+      }
+      if (isDatabaseDriverError(error) && error.code === "23503") {
+        throw new ForeignKeyViolationError("Foreign key violation");
+      }
       const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
       throw new DatabaseError(`Error creating entity: ${errorMessage}`);
     }

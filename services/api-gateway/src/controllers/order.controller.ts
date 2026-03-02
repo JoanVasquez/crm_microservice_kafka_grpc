@@ -1,5 +1,13 @@
 import { NextFunction, Request, Response } from "express";
-import { HttpStatus, OrderServiceClient, ResponseTemplate } from "shared";
+import { CreateOrderRequest, HttpStatus, OrderServiceClient, ResponseTemplate } from "shared";
+
+type OrderIdParams = {
+  id: string;
+};
+
+type UserIdParams = {
+  userId: string;
+};
 
 export class OrderController {
   private orderService: OrderServiceClient;
@@ -8,7 +16,11 @@ export class OrderController {
     this.orderService = new OrderServiceClient();
   }
 
-  async createOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async createOrder(
+    req: Request<Record<string, never>, unknown, CreateOrderRequest>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const { userId, items } = req.body;
       const newOrder = await this.orderService.createOrder({
@@ -31,7 +43,11 @@ export class OrderController {
     }
   }
 
-  async getOrderById(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getOrderById(
+    req: Request<OrderIdParams>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const { id } = req.params;
       const order = await this.orderService.getOrderById(id);
@@ -50,7 +66,11 @@ export class OrderController {
       next(error);
     }
   }
-  async getOrdersByUserId(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getOrdersByUserId(
+    req: Request<UserIdParams>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const { userId } = req.params;
       const orders = await this.orderService.getOrdersByUserId(userId);

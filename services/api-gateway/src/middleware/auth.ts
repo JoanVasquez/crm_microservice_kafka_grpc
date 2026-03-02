@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
 import jwt from "jsonwebtoken";
-import { AuthedUser, AuthError, config, Roles, UserResponse } from "shared/dist";
+import { AuthedUser, AuthError, config, Roles, UserResponse } from "shared";
 
 declare global {
   namespace Express {

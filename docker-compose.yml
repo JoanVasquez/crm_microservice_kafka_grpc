@@ -206,6 +206,7 @@ services:
   filebeat:
     image: docker.elastic.co/beats/filebeat:8.8.0
     user: root
+    command: ["filebeat", "-e", "--strict.perms=false"]
     volumes:
       - ./monitoring/elk/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
@@ -220,4 +221,3 @@ volumes:
   grafana_data:
   elasticsearch_data:
   kafka_data:
-

@@ -10,6 +10,16 @@ export interface CreateOrderRequest {
   }>;
 }
 
+export type GetOrderRequest = {
+  id: string;
+};
+
+export type GetUserOrdersRequest = {
+  userId: string;
+  page?: number;
+  limit?: number;
+};
+
 export interface OrderResponse {
   id: string;
   userId: string;
@@ -23,6 +33,13 @@ export interface OrderResponse {
   createdAt: string;
   updatedAt: string;
 }
+
+export type GetUserOrdersResponse = {
+  orders: OrderResponse[];
+  total: number;
+  page: number;
+  limit: number;
+};
 
 export class OrderServiceClient {
   private grpcService: GrpcService;

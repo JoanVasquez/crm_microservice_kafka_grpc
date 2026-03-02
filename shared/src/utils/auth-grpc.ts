@@ -1,5 +1,5 @@
 import { status, Metadata, ServerUnaryCall, sendUnaryData } from "@grpc/grpc-js";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 export type Roles = "Admin" | "Customer" | "Supplier" | "Guess";
 
@@ -26,6 +26,15 @@ export type CallContext = {
 
 const JWT_SECRET: string = process.env.JWT_SECRET ?? "dev-secret";
 
+type JwtClaims = JwtPayload & {
+  sub?: string;
+  roles?: unknown;
+};
+
+function isJwtClaims(payload: unknown): payload is JwtClaims {
+  return typeof payload === "object" && payload !== null;
+}
+
 export function getBearerToken(md: Metadata): string | null {
   const raw = md.get("authorization")[0];
   if (!raw || typeof raw !== "string") return null;
@@ -37,16 +46,20 @@ export function getBearerToken(md: Metadata): string | null {
 export function verifyJwt(token: string): AuthedUser {
   const payload = jwt.verify(token, JWT_SECRET);
 
-  if (typeof payload !== "object" || payload === null) {
+  if (!isJwtClaims(payload)) {
     throw new Error("Invalid JWT payload");
   }
 
-  const sub = String((payload as any).sub);
-  const rolesRaw = (payload as any).roles;
+  const sub = typeof payload.sub === "string" ? payload.sub : String(payload.sub ?? "");
+  const rolesRaw = payload.roles;
 
   return {
     sub,
-    roles: Array.isArray(rolesRaw) ? (rolesRaw as Roles[]) : [],
+    roles: Array.isArray(rolesRaw)
+      ? rolesRaw.filter((role): role is Roles =>
+          role === "Admin" || role === "Customer" || role === "Supplier" || role === "Guess",
+        )
+      : [],
   };
 }
 

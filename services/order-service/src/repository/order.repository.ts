@@ -4,7 +4,10 @@ import { Order } from "../entities/order.entity";
 
 @injectable()
 export class OrderRepository extends GenericRepository<Order> {
-  constructor(@inject("AppDataSource") private dataSource: any) {
+  constructor(
+    @inject("AppDataSource")
+    private dataSource: ConstructorParameters<typeof GenericRepository<Order>>[0],
+  ) {
     super(dataSource, Order);
   }
 

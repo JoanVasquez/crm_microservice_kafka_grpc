@@ -84,7 +84,7 @@ export class UserServiceClient {
     return this.grpcService.call<UserResponse>("GetUserByEmail", { email });
   }
 
-  async updateUser(id: string, request: CreateUserRequest): Promise<UserResponse> {
+  async updateUser(id: string, request: Omit<UpdateUserRequest, "id">): Promise<UserResponse> {
     return this.grpcService.call<UserResponse>("UpdateUser", { id, ...request });
   }
 

@@ -24,7 +24,7 @@ export class User {
   @Column()
   password!: string;
 
-  @Column()
+  @Column({ type: "text", array: true, default: () => "ARRAY[]::text[]" })
   roles!: Roles[];
 
   @Column({ default: true })

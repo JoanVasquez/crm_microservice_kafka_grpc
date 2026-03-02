@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { httpRequestDuration, httpRequestsTotal } from "shared/dist";
+import { httpRequestDuration, httpRequestsTotal } from "shared";
 
 export const metricsMiddleware = (serviceName: string) => {
   return (req: Request, res: Response, next: NextFunction): void => {

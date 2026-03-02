@@ -1,5 +1,5 @@
 import { app } from "./app";
-import { config } from "shared/dist";
+import { config } from "shared";
 
 const startServer = async () => {
   try {

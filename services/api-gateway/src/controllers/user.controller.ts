@@ -1,5 +1,20 @@
 import { NextFunction, Request, Response } from "express";
-import { HttpStatus, ResponseTemplate, UserServiceClient } from "shared/dist";
+import { HttpStatus, ResponseTemplate, Roles, UserServiceClient } from "shared";
+
+type UserIdParams = {
+  id: string;
+};
+
+type UserEmailParams = {
+  email: string;
+};
+
+type GatewayUpdateUserBody = {
+  firstName?: string;
+  lastName?: string;
+  isActive?: boolean;
+  roles: Roles[];
+};
 
 export class UserController {
   private userService: UserServiceClient;
@@ -8,7 +23,16 @@ export class UserController {
     this.userService = new UserServiceClient();
   }
 
-  async getUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+  private updateGatewayUser(id: string, request: GatewayUpdateUserBody) {
+    const updateUser = this.userService.updateUser as (
+      userId: string,
+      payload: GatewayUpdateUserBody,
+    ) => ReturnType<UserServiceClient["updateUser"]>;
+
+    return updateUser.call(this.userService, id, request);
+  }
+
+  async getUser(req: Request<UserIdParams>, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.params.id;
       const user = await this.userService.getUser(userId);
@@ -23,7 +47,11 @@ export class UserController {
     }
   }
 
-  async getUserByEmail(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getUserByEmail(
+    req: Request<UserEmailParams>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const userEmail = req.params.email;
       const user = await this.userService.getUserByEmail(userEmail);
@@ -38,17 +66,21 @@ export class UserController {
     }
   }
 
-  async updateUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async updateUser(
+    req: Request<UserIdParams, unknown, GatewayUpdateUserBody>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const userId = req.params.id;
-      const { email, firstName, lastName, password, roles } = req.body;
-      const updatedUser = await this.userService.updateUser(userId, {
-        email,
-        firstName,
-        lastName,
-        password,
+      const { firstName, lastName, isActive, roles } = req.body;
+      const updateRequest: GatewayUpdateUserBody = {
         roles,
-      });
+        ...(firstName !== undefined ? { firstName } : {}),
+        ...(lastName !== undefined ? { lastName } : {}),
+        ...(isActive !== undefined ? { isActive } : {}),
+      };
+      const updatedUser = await this.updateGatewayUser(userId, updateRequest);
 
       res
         .status(HttpStatus.OK.code)
@@ -65,7 +97,7 @@ export class UserController {
     }
   }
 
-  async deleteUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async deleteUser(req: Request<UserIdParams>, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.params.id;
       const isDeleted = await this.userService.deleteUser(userId);
@@ -81,7 +113,7 @@ export class UserController {
           ),
         );
     } catch (error) {
-      next(next);
+      next(error);
     }
   }
 }

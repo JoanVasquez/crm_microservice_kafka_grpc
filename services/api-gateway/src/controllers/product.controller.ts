@@ -1,5 +1,24 @@
 import { NextFunction, Request, Response } from "express";
-import { HttpStatus, ProductServiceClient, ResponseTemplate } from "shared/dist";
+import {
+  CreateProductRequest,
+  HttpStatus,
+  ProductServiceClient,
+  ResponseTemplate,
+  UpdateProductRequest,
+} from "shared";
+
+type ProductIdParams = {
+  id: string;
+};
+
+type ProductListQuery = {
+  page?: string;
+  limit?: string;
+};
+
+type UpdateStockBody = {
+  quantity: number;
+};
 
 export class ProductController {
   private productService: ProductServiceClient;
@@ -8,15 +27,20 @@ export class ProductController {
     this.productService = new ProductServiceClient();
   }
 
-  async createProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async createProduct(
+    req: Request<Record<string, never>, unknown, CreateProductRequest>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
-      const { name, description, price, stock } = req.body;
+      const { name, description, price, stock, category } = req.body;
 
       const newProduct = await this.productService.createProduct({
         name,
         description,
         price,
         stock,
+        category,
       });
 
       res.status(HttpStatus.CREATED.code).send(
@@ -34,7 +58,11 @@ export class ProductController {
     }
   }
 
-  async getProducts(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getProducts(
+    req: Request<Record<string, never>, unknown, unknown, ProductListQuery>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const products = await this.productService.getProducts(
         parseInt(req.query.page as string),
@@ -51,7 +79,11 @@ export class ProductController {
     }
   }
 
-  async getProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getProduct(
+    req: Request<ProductIdParams>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const productId = req.params.id;
       const product = await this.productService.getProduct(productId);
@@ -66,17 +98,23 @@ export class ProductController {
     }
   }
 
-  async updateProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async updateProduct(
+    req: Request<ProductIdParams, unknown, Omit<UpdateProductRequest, "id">>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const productId = req.params.id;
-      const { name, description, price, stock } = req.body;
+      const { name, description, price, stock, category } = req.body;
+      const updateRequest: Omit<UpdateProductRequest, "id"> = {
+        ...(name !== undefined ? { name } : {}),
+        ...(description !== undefined ? { description } : {}),
+        ...(price !== undefined ? { price } : {}),
+        ...(stock !== undefined ? { stock } : {}),
+        ...(category !== undefined ? { category } : {}),
+      };
 
-      const updatedProduct = await this.productService.updateProduct(productId, {
-        name,
-        description,
-        price,
-        stock,
-      });
+      const updatedProduct = await this.productService.updateProduct(productId, updateRequest);
 
       res.status(HttpStatus.OK.code).send(
         new ResponseTemplate(HttpStatus.OK.code, HttpStatus.OK.status, HttpStatus.OK.description, {
@@ -88,7 +126,11 @@ export class ProductController {
     }
   }
 
-  async updateStock(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async updateStock(
+    req: Request<ProductIdParams, unknown, UpdateStockBody>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const productId = req.params.id;
       const { quantity } = req.body;
@@ -104,7 +146,11 @@ export class ProductController {
     }
   }
 
-  async deleteProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async deleteProduct(
+    req: Request<ProductIdParams>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const productId = req.params.id;
       const isDeleted = await this.productService.deleteProduct(productId);

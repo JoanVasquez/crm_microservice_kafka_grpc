@@ -6,7 +6,7 @@ import {
   ForeignKeyViolationError,
   HttpStatus,
   ResponseTemplate,
-} from "shared/dist";
+} from "shared";
 
 export const errorHandler = (
   error: unknown,

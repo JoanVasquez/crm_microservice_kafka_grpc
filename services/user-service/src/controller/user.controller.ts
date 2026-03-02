@@ -1,5 +1,5 @@
 import { injectable } from "tsyringe";
-import { Metadata, sendUnaryData, ServerUnaryCall, ServiceError, status } from "@grpc/grpc-js";
+import { sendUnaryData, ServerUnaryCall } from "@grpc/grpc-js";
 import { CreateUserDto, UpdateUserDto } from "../dtos/user.dto";
 import { UserService } from "../service/user.service";
 import { User } from "../entities/user.entity";
@@ -9,8 +9,6 @@ import {
   DeleteUserResponse,
   GetUserByEmailRequest,
   GetUserRequest,
-  grpcServiceError,
-  HttpStatus,
   mapGrpcResponse,
   toServiceError,
   UpdateUserRequest,

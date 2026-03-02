@@ -4,9 +4,10 @@ import { ICacheService, IMessagingService, KafkaMessagingService, RedisCacheServ
 import { UserController } from "./controller/user.controller";
 import { UserService } from "./service/user.service";
 import { UserRepository } from "./repository/user.repository.impl";
+import { AppDataSource } from "./config/database";
 
 export async function registerDependencies(): Promise<void> {
-  // Register as singletons - they handle their own connection management
+  container.registerInstance<typeof AppDataSource>("AppDataSource", AppDataSource);
   container.registerSingleton<UserRepository>("UserRepository", UserRepository);
   container.registerSingleton<ICacheService>("CacheService", RedisCacheService);
   container.registerSingleton<IMessagingService>("KafkaMessagingService", KafkaMessagingService);

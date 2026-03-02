@@ -1,21 +1,63 @@
 import { config } from "../config/config";
 import { GrpcService } from "../utils/grpc-service";
 
+export type GetProductRequest = {
+  id: string;
+};
+
+export type GetProductsRequest = {
+  page?: number;
+  limit?: number;
+  category?: string;
+};
+
 export interface CreateProductRequest {
   name: string;
   description: string;
   price: number;
   stock: number;
+  category: string;
 }
 
-export interface ProductResponse {
+export type UpdateProductRequest = {
+  id: string;
+  name?: string;
+  description?: string;
+  price?: number;
+  stock?: number;
+  category?: string;
+};
+
+export type UpdateStockRequest = {
+  id: string;
+  quantity: number;
+};
+
+export type DeleteProductRequest = {
+  id: string;
+};
+
+export type ProductResponse = {
   id: string;
   name: string;
   description: string;
   price: number;
   stock: number;
-  isActive: boolean;
-}
+  category: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type GetProductsResponse = {
+  products: ProductResponse[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
+export type DeleteProductResponse = {
+  success: boolean;
+};
 
 export class ProductServiceClient {
   private grpcService: GrpcService;
@@ -45,7 +87,7 @@ export class ProductServiceClient {
     return this.grpcService.call<ProductResponse>("GetProduct", { id });
   }
 
-  async updateProduct(id: string, request: CreateProductRequest): Promise<ProductResponse> {
+  async updateProduct(id: string, request: Omit<UpdateProductRequest, "id">): Promise<ProductResponse> {
     return this.grpcService.call<ProductResponse>("UpdateProduct", { id, ...request });
   }
 
