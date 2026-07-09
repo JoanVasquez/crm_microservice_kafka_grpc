@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { STATUS_CODES } from "http";
 import jwt from "jsonwebtoken";
 import {
   AuthedUser,

@@ -1,12 +1,10 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
 import jwt from "jsonwebtoken";
-import { AuthedUser, AuthError, config, Role, UserResponse } from "shared";
+import { AuthedUser, AuthError, config, Role } from "shared";
 
-declare global {
-  namespace Express {
-    interface Request {
-      token?: string;
-    }
+declare module "express-serve-static-core" {
+  interface Request {
+    token?: string;
   }
 }
 

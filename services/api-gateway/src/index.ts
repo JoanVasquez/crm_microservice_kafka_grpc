@@ -18,7 +18,7 @@ const startServer = async () => {
       console.log("SIGINT received, shutting down gracefully");
       process.exit(0);
     });
-  } catch (error) {
+  } catch {
     process.exit(1);
   }
 };

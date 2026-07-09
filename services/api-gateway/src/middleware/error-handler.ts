@@ -1,9 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import {
   CustomError,
-  DatabaseError,
-  DuplicateRecordError,
-  ForeignKeyViolationError,
   HttpStatus,
   ResponseTemplate,
 } from "shared";
@@ -12,8 +9,11 @@ export const errorHandler = (
   error: unknown,
   req: Request,
   res: Response,
-  _: NextFunction,
+  next: NextFunction,
 ): Response<unknown, Record<string, unknown>> | void => {
+  void req;
+  void next;
+
   if (error instanceof CustomError) {
     return res
       .status(error.statusCode)
