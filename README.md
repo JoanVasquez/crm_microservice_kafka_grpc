@@ -83,8 +83,8 @@ Each service has a `Dockerfile` and service-local `tsconfig.json` and `package.j
 
 ## Configuration and environment
 
-- The compose file(s) define environment variables and mount points. Check `docker-compose.yml` for service-specific env vars and volumes.
-- Secrets or sensitive values should be provided through your Docker environment or an appropriate secrets manager — do not commit secrets to the repository.
+- Docker Compose reads values from `.env`. Copy `.env.example` to `.env` when setting up a new local environment, then adjust ports, image tags, and credentials as needed.
+- Secrets or sensitive values should be provided through your Docker environment or an appropriate secrets manager. Keep real secrets out of committed files.
 
 ## Observability
 

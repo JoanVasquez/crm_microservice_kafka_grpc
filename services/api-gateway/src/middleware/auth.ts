@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
 import jwt from "jsonwebtoken";
-import { AuthedUser, AuthError, config, Roles, UserResponse } from "shared";
+import { AuthedUser, AuthError, config, Role, UserResponse } from "shared";
 
 declare global {
   namespace Express {
@@ -35,7 +35,7 @@ export const authenticateToken = async (
   }
 };
 
-export const authorize = (roles: Roles[]): RequestHandler => {
+export const authorize = (roles: Role[]): RequestHandler => {
   return async (req: Request, _: Response, next: NextFunction): Promise<void> => {
     if (!req.token) throw new AuthError("Unauthorized");
     const decoded = jwt.verify(req.token, config.jwtSecret) as AuthedUser;

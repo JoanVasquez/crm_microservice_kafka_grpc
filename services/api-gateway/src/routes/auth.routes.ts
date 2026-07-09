@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { body } from "express-validator";
+import { CRM_ROLES } from "shared";
 import { AuthController } from "../controllers/auth.controller";
 import { validateRequest } from "../middleware/validate-request";
 
@@ -14,7 +15,7 @@ router.post(
     body("lastName").trim().isLength({ min: 2, max: 50 }),
     body("password").isLength({ min: 8 }),
     body("roles").isArray({ min: 1 }),
-    body("roles.*").isString(),
+    body("roles.*").isIn(CRM_ROLES),
     validateRequest,
   ],
   authController.register.bind(authController),

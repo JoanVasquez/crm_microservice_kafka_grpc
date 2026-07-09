@@ -1,0 +1,45 @@
+export enum Role {
+  CrmAdministrator = "CRM Administrator",
+  SalesRepresentative = "Sales Representative",
+  SalesManager = "Sales Manager",
+  AccountManager = "Account Manager",
+  CustomerSupportAgent = "Customer Support Agent",
+  SupportManager = "Support Manager",
+  MarketingUser = "Marketing User",
+  MarketingManager = "Marketing Manager",
+  CustomerSuccessManager = "Customer Success Manager",
+  OperationsManager = "Operations Manager",
+  ExecutiveDirector = "Executive / Director",
+  ReadOnlyUser = "Read-Only User",
+  LeadQualifierSdr = "Lead Qualifier / SDR",
+  BusinessDevelopmentRepresentative = "Business Development Representative",
+  InsideSalesRepresentative = "Inside Sales Representative",
+  FieldSalesRepresentative = "Field Sales Representative",
+  SalesCoordinator = "Sales Coordinator",
+  SalesOperationsAnalyst = "Sales Operations Analyst",
+  TicketAgent = "Ticket Agent",
+  EscalationSpecialist = "Escalation Specialist",
+  TechnicalSupportSpecialist = "Technical Support Specialist",
+  ServiceDispatcher = "Service Dispatcher",
+  FieldServiceTechnician = "Field Service Technician",
+  CampaignManager = "Campaign Manager",
+  EmailMarketingSpecialist = "Email Marketing Specialist",
+  LeadScoringManager = "Lead Scoring Manager",
+  DataAnalyst = "Data Analyst",
+  DataSteward = "Data Steward",
+  SystemOwner = "System Owner",
+  CrmDeveloper = "CRM Developer",
+  IntegrationSpecialist = "Integration Specialist",
+  SecurityAdministrator = "Security Administrator",
+  WorkflowAutomationSpecialist = "Workflow Automation Specialist",
+  PartnerUser = "Partner User",
+  VendorUser = "Vendor User",
+  ClientPortalUser = "Client Portal User",
+  Auditor = "Auditor",
+}
+
+export const CRM_ROLES: readonly Role[] = Object.values(Role);
+
+export function isRole(value: unknown): value is Role {
+  return typeof value === "string" && CRM_ROLES.includes(value as Role);
+}

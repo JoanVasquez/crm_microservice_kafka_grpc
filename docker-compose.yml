@@ -1,61 +1,61 @@
 services:
   kafka:
-    image: confluentinc/cp-kafka:7.7.1
-    container_name: kafka
+    image: ${KAFKA_IMAGE}
+    container_name: ${KAFKA_CONTAINER_NAME}
     ports:
-      - "9092:9092"
-      - "9093:9093"
+      - "${KAFKA_CLIENT_HOST_PORT}:${KAFKA_CLIENT_PORT}"
+      - "${KAFKA_CONTROLLER_HOST_PORT}:${KAFKA_CONTROLLER_PORT}"
     environment:
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_NODE_ID: ${KAFKA_NODE_ID}
+      KAFKA_PROCESS_ROLES: ${KAFKA_PROCESS_ROLES}
+      KAFKA_CONTROLLER_QUORUM_VOTERS: ${KAFKA_NODE_ID}@${KAFKA_HOST}:${KAFKA_CONTROLLER_PORT}
+      KAFKA_LISTENERS: PLAINTEXT://:${KAFKA_CLIENT_PORT},CONTROLLER://:${KAFKA_CONTROLLER_PORT}
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://${KAFKA_HOST}:${KAFKA_CLIENT_PORT}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: ${KAFKA_LISTENER_SECURITY_PROTOCOL_MAP}
+      KAFKA_CONTROLLER_LISTENER_NAMES: ${KAFKA_CONTROLLER_LISTENER_NAMES}
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: ${KAFKA_AUTO_CREATE_TOPICS_ENABLE}
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: ${KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR}
+      CLUSTER_ID: ${KAFKA_CLUSTER_ID}
     volumes:
       - kafka_data:/var/lib/kafka/data
     restart: unless-stopped
 
   redis:
-    image: redis:7-alpine
+    image: ${REDIS_IMAGE}
     ports:
-      - "6379:6379"
+      - "${REDIS_HOST_PORT}:${REDIS_PORT}"
     command: redis-server --appendonly yes
 
   user-db:
-    image: postgres:15
+    image: ${POSTGRES_IMAGE}
     environment:
-      POSTGRES_DB: user_service_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${USER_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5433:5432"
+      - "${USER_DB_HOST_PORT}:${POSTGRES_PORT}"
     volumes:
       - user_db_data:/var/lib/postgresql/data
 
   product-db:
-    image: postgres:15
+    image: ${POSTGRES_IMAGE}
     environment:
-      POSTGRES_DB: product_service_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${PRODUCT_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5434:5432"
+      - "${PRODUCT_DB_HOST_PORT}:${POSTGRES_PORT}"
     volumes:
       - product_db_data:/var/lib/postgresql/data
 
   order-db:
-    image: postgres:15
+    image: ${POSTGRES_IMAGE}
     environment:
-      POSTGRES_DB: order_service_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${ORDER_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5435:5432"
+      - "${ORDER_DB_HOST_PORT}:${POSTGRES_PORT}"
     volumes:
       - order_db_data:/var/lib/postgresql/data
 
@@ -64,18 +64,18 @@ services:
       context: .
       dockerfile: ./services/api-gateway/Dockerfile
     ports:
-      - "3000:3000"
+      - "${API_GATEWAY_HOST_PORT}:${API_GATEWAY_PORT}"
     environment:
-      - NODE_ENV=development
-      - PORT=3000
-      - JWT_SECRET=your-super-secure-jwt-secret-min-32-chars
-      - REDIS_HOST=redis
-      - USER_SERVICE_HOST=user-service
-      - USER_SERVICE_PORT=50051
-      - PRODUCT_SERVICE_HOST=product-service
-      - PRODUCT_SERVICE_PORT=50052
-      - ORDER_SERVICE_HOST=order-service
-      - ORDER_SERVICE_PORT=50053
+      - NODE_ENV=${NODE_ENV}
+      - PORT=${API_GATEWAY_PORT}
+      - JWT_SECRET=${JWT_SECRET}
+      - REDIS_HOST=${REDIS_HOST}
+      - USER_SERVICE_HOST=${USER_SERVICE_HOST}
+      - USER_SERVICE_PORT=${USER_SERVICE_PORT}
+      - PRODUCT_SERVICE_HOST=${PRODUCT_SERVICE_HOST}
+      - PRODUCT_SERVICE_PORT=${PRODUCT_SERVICE_PORT}
+      - ORDER_SERVICE_HOST=${ORDER_SERVICE_HOST}
+      - ORDER_SERVICE_PORT=${ORDER_SERVICE_PORT}
     depends_on:
       - redis
       - user-service
@@ -86,20 +86,20 @@ services:
       context: .
       dockerfile: ./services/user-service/Dockerfile
     ports:
-      - "50051:50051"
+      - "${USER_SERVICE_HOST_PORT}:${USER_SERVICE_PORT}"
     environment:
-      - NODE_ENV=development
-      - GRPC_PORT=50051
-      - DB_HOST=user-db
-      - DB_PORT=5432
-      - DB_USERNAME=postgres
-      - DB_PASSWORD=password
-      - DB_NAME=user_service_db
-      - REDIS_HOST=redis
-      - REDIS_URL=redis://redis:6379
-      - KAFKA_BROKERS=kafka:9092
-      - KAFKA_CLIENT_ID=user_service_client
-      - KAFKA_GROUP_ID=user-service-group
+      - NODE_ENV=${NODE_ENV}
+      - GRPC_PORT=${USER_SERVICE_PORT}
+      - DB_HOST=${USER_DB_HOST}
+      - DB_PORT=${POSTGRES_PORT}
+      - DB_USERNAME=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=${USER_DB_NAME}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_URL=${REDIS_URL}
+      - KAFKA_BROKERS=${KAFKA_BROKERS}
+      - KAFKA_CLIENT_ID=${USER_SERVICE_KAFKA_CLIENT_ID}
+      - KAFKA_GROUP_ID=${USER_SERVICE_KAFKA_GROUP_ID}
     depends_on:
       - user-db
       - redis
@@ -110,20 +110,20 @@ services:
       context: .
       dockerfile: ./services/product-service/Dockerfile
     ports:
-      - "50052:50052"
+      - "${PRODUCT_SERVICE_HOST_PORT}:${PRODUCT_SERVICE_PORT}"
     environment:
-      - NODE_ENV=development
-      - GRPC_PORT=50052
-      - DB_HOST=product-db
-      - DB_PORT=5432
-      - DB_USERNAME=postgres
-      - DB_PASSWORD=password
-      - DB_NAME=product_service_db
-      - REDIS_HOST=redis
-      - REDIS_URL=redis://redis:6379
-      - KAFKA_BROKERS=kafka:9092
-      - KAFKA_CLIENT_ID=product_service_client
-      - KAFKA_GROUP_ID=product-service-group
+      - NODE_ENV=${NODE_ENV}
+      - GRPC_PORT=${PRODUCT_SERVICE_PORT}
+      - DB_HOST=${PRODUCT_DB_HOST}
+      - DB_PORT=${POSTGRES_PORT}
+      - DB_USERNAME=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=${PRODUCT_DB_NAME}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_URL=${REDIS_URL}
+      - KAFKA_BROKERS=${KAFKA_BROKERS}
+      - KAFKA_CLIENT_ID=${PRODUCT_SERVICE_KAFKA_CLIENT_ID}
+      - KAFKA_GROUP_ID=${PRODUCT_SERVICE_KAFKA_GROUP_ID}
     depends_on:
       - product-db
       - redis
@@ -134,27 +134,27 @@ services:
       context: .
       dockerfile: ./services/order-service/Dockerfile
     ports:
-      - "50053:50053"
+      - "${ORDER_SERVICE_HOST_PORT}:${ORDER_SERVICE_PORT}"
     environment:
-      - NODE_ENV=development
-      - GRPC_PORT=50053
-      - DB_HOST=order-db
-      - DB_PORT=5432
-      - DB_USERNAME=postgres
-      - DB_PASSWORD=password
-      - DB_NAME=order_service_db
-      - REDIS_HOST=redis
-      - REDIS_URL=redis://redis:6379
-      - KAFKA_BROKERS=kafka:9092
+      - NODE_ENV=${NODE_ENV}
+      - GRPC_PORT=${ORDER_SERVICE_PORT}
+      - DB_HOST=${ORDER_DB_HOST}
+      - DB_PORT=${POSTGRES_PORT}
+      - DB_USERNAME=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=${ORDER_DB_NAME}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_URL=${REDIS_URL}
+      - KAFKA_BROKERS=${KAFKA_BROKERS}
     depends_on:
       - order-db
       - redis
       - kafka
 
   prometheus:
-    image: prom/prometheus:latest
+    image: ${PROMETHEUS_IMAGE}
     ports:
-      - "9090:9090"
+      - "${PROMETHEUS_HOST_PORT}:${PROMETHEUS_PORT}"
     volumes:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
@@ -165,46 +165,46 @@ services:
       - "--web.enable-lifecycle"
 
   grafana:
-    image: grafana/grafana:latest
+    image: ${GRAFANA_IMAGE}
     ports:
-      - "3001:3000"
+      - "${GRAFANA_HOST_PORT}:${GRAFANA_PORT}"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
     volumes:
       - grafana_data:/var/lib/grafana
 
   # ELK Stack
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
+    image: ${ELASTICSEARCH_IMAGE}
     environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.type=${ELASTICSEARCH_DISCOVERY_TYPE}
+      - xpack.security.enabled=${ELASTICSEARCH_SECURITY_ENABLED}
+      - ES_JAVA_OPTS=${ELASTICSEARCH_JAVA_OPTS}
     ports:
-      - "9200:9200"
+      - "${ELASTICSEARCH_HOST_PORT}:${ELASTICSEARCH_PORT}"
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
 
   logstash:
-    image: docker.elastic.co/logstash/logstash:8.8.0
+    image: ${LOGSTASH_IMAGE}
     ports:
-      - "5044:5044"
+      - "${LOGSTASH_HOST_PORT}:${LOGSTASH_PORT}"
     volumes:
       - ./monitoring/elk/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
     depends_on:
       - elasticsearch
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:8.8.0
+    image: ${KIBANA_IMAGE}
     ports:
-      - "5601:5601"
+      - "${KIBANA_HOST_PORT}:${KIBANA_PORT}"
     environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
     depends_on:
       - elasticsearch
 
   filebeat:
-    image: docker.elastic.co/beats/filebeat:8.8.0
+    image: ${FILEBEAT_IMAGE}
     user: root
     command: ["filebeat", "-e", "--strict.perms=false"]
     volumes:

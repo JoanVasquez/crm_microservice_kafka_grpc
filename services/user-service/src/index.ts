@@ -10,6 +10,7 @@ import {
 } from "@grpc/grpc-js";
 import { loadSync } from "@grpc/proto-loader";
 import { register } from "shared/dist/utils/metrics";
+import { Role } from "shared/dist";
 import { UserController } from "./controller/user.controller";
 import { registerDependencies } from "./containers";
 import { initializeDatabase } from "./config/database";
@@ -47,25 +48,25 @@ async function startServer() {
       CreateUser: userController.CreateUser.bind(userController),
       GetUser: wrapUnary(
         userController.GetUser.bind(userController),
-        authUnaryInterceptor(["Admin", "Customer"]),
+        authUnaryInterceptor([Role.CrmAdministrator, Role.ClientPortalUser]),
       ),
       ValidateUser: userController.ValidateUser.bind(userController),
       GetUserByEmail: wrapUnary(
         userController.GetUserByEmail.bind(userController),
-        authUnaryInterceptor(["Admin", "Customer"]),
+        authUnaryInterceptor([Role.CrmAdministrator, Role.ClientPortalUser]),
       ),
       UpdateUser: wrapUnary(
         userController.UpdateUser.bind(userController),
-        authUnaryInterceptor(["Admin", "Customer"]),
+        authUnaryInterceptor([Role.CrmAdministrator, Role.ClientPortalUser]),
       ),
       DeleteUser: wrapUnary(
         userController.DeleteUser.bind(userController),
-        authUnaryInterceptor(["Admin"]),
+        authUnaryInterceptor([Role.CrmAdministrator]),
       ),
     });
 
     register.setDefaultLabels({ service: "user-service" });
-    register.metrics().then((metrics) => {
+    register.metrics().then((metrics: string) => {
       console.log("Metrics registered:", metrics);
     });
 

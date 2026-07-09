@@ -3,6 +3,7 @@ import { container } from "tsyringe";
 import { GrpcObject, Server, ServerCredentials, ServiceDefinition, UntypedServiceImplementation, loadPackageDefinition } from "@grpc/grpc-js";
 import { loadSync } from "@grpc/proto-loader";
 import { register } from "shared/dist/utils/metrics";
+import { Role } from "shared/dist";
 import { registerDependencies } from "./containers";
 import { initializeDatabase } from "./config/database";
 import { OrderController } from "./controller/order.controller";
@@ -38,20 +39,20 @@ async function startServer() {
     server.addService(orderProto.OrderService.service, {
       CreateOrder: wrapUnary(
         orderController.CreateOrder.bind(orderController),
-        authUnaryInterceptor(["Customer"]),
+        authUnaryInterceptor([Role.ClientPortalUser]),
       ),
       GetOrder: wrapUnary(
         orderController.GetOrder.bind(orderController),
-        authUnaryInterceptor(["Admin"]),
+        authUnaryInterceptor([Role.CrmAdministrator]),
       ),
       GetUserOrders: wrapUnary(
         orderController.GetUserOrders.bind(orderController),
-        authUnaryInterceptor(["Admin", "Customer"]),
+        authUnaryInterceptor([Role.CrmAdministrator, Role.ClientPortalUser]),
       ),
     });
 
     register.setDefaultLabels({ service: "order-service" });
-    register.metrics().then((metrics) => {
+    register.metrics().then((metrics: string) => {
       console.log("Metrics registered:", metrics);
     });
 

@@ -3,6 +3,7 @@ import { container } from "tsyringe";
 import { GrpcObject, Server, ServerCredentials, ServiceDefinition, UntypedServiceImplementation, loadPackageDefinition } from "@grpc/grpc-js";
 import { loadSync } from "@grpc/proto-loader";
 import { register } from "shared/dist/utils/metrics";
+import { Role } from "shared/dist";
 import { ProductController } from "./controller/product.controller";
 import { registerDependencies } from "./containers";
 import { initializeDatabase } from "./config/database";
@@ -58,32 +59,32 @@ async function startServer() {
     server.addService(productProto.ProductService.service, {
       GetProduct: wrapUnary(
         productController.GetProduct.bind(productController),
-        authUnaryInterceptor(["Admin", "Supplier", "Customer"]),
+        authUnaryInterceptor([Role.CrmAdministrator, Role.VendorUser, Role.ClientPortalUser]),
       ),
       CreateProduct: wrapUnary(
         productController.CreateProduct.bind(productController),
-        authUnaryInterceptor(["Admin", "Supplier"]),
+        authUnaryInterceptor([Role.CrmAdministrator, Role.VendorUser]),
       ),
       UpdateProduct: wrapUnary(
         productController.UpdateProduct.bind(productController),
-        authUnaryInterceptor(["Admin", "Supplier"]),
+        authUnaryInterceptor([Role.CrmAdministrator, Role.VendorUser]),
       ),
       DeleteProduct: wrapUnary(
         productController.DeleteProduct.bind(productController),
-        authUnaryInterceptor(["Admin", "Supplier"]),
+        authUnaryInterceptor([Role.CrmAdministrator, Role.VendorUser]),
       ),
       GetProducts: wrapUnary(
         productController.GetProducts.bind(productController),
-        authUnaryInterceptor(["Admin", "Supplier", "Customer"]),
+        authUnaryInterceptor([Role.CrmAdministrator, Role.VendorUser, Role.ClientPortalUser]),
       ),
       UpdateStock: wrapUnary(
         productController.UpdateStock.bind(productController),
-        authUnaryInterceptor(["Admin", "Supplier"]),
+        authUnaryInterceptor([Role.CrmAdministrator, Role.VendorUser]),
       ),
     });
 
     register.setDefaultLabels({ service: "product-service" });
-    register.metrics().then((metrics) => {
+    register.metrics().then((metrics: string) => {
       console.log("Metrics registered:", metrics);
     });
 

@@ -1,11 +1,10 @@
 import { status, Metadata, ServerUnaryCall, sendUnaryData } from "@grpc/grpc-js";
 import jwt, { JwtPayload } from "jsonwebtoken";
-
-export type Roles = "Admin" | "Customer" | "Supplier" | "Guess";
+import { isRole, Role } from "../types/roles";
 
 export type AuthedUser = {
   sub: string;
-  roles: Roles[];
+  roles: Role[];
 };
 
 type AuthedUnaryCall<Req, Res> = ServerUnaryCall<Req, Res> & { context?: CallContext };
@@ -56,14 +55,12 @@ export function verifyJwt(token: string): AuthedUser {
   return {
     sub,
     roles: Array.isArray(rolesRaw)
-      ? rolesRaw.filter((role): role is Roles =>
-          role === "Admin" || role === "Customer" || role === "Supplier" || role === "Guess",
-        )
+      ? rolesRaw.filter(isRole)
       : [],
   };
 }
 
-export function requiredRoles(required: Roles[]) {
+export function requiredRoles(required: Role[]) {
   return (user?: AuthedUser) => {
     if (!user) return false;
     const roles = user.roles ?? [];
@@ -71,7 +68,7 @@ export function requiredRoles(required: Roles[]) {
   };
 }
 
-export const authUnaryInterceptor = (roles: Roles[]) => {
+export const authUnaryInterceptor = (roles: Role[]) => {
   const rolecheck = requiredRoles(roles);
 
   return function <Req, Res>(

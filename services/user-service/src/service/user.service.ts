@@ -1,5 +1,4 @@
 import { inject, injectable } from "tsyringe";
-import { IUserRepository } from "../repository/IUserRepository";
 import {
   AuthError,
   ICacheService,
@@ -37,7 +36,7 @@ export class UserService {
     this.cacheService
       .set(`user_${user.id}`, JSON.stringify(user), 3600)
       .then(() => console.log("✅ User cached successfully"))
-      .catch((error) => console.warn("⚠️ Cache set failed:", error.message));
+      .catch((error: Error) => console.warn("⚠️ Cache set failed:", error.message));
 
     // // Non-blocking Kafka
     // const event: UserCreatedEvent = {
@@ -71,7 +70,7 @@ export class UserService {
     if (user) {
       this.cacheService
         .set(`user:${user.id}`, user, 3600)
-        .catch((error) => console.warn("⚠️ Background cache set failed:", error.message));
+        .catch((error: Error) => console.warn("⚠️ Background cache set failed:", error.message));
     }
 
     return user;
@@ -89,7 +88,7 @@ export class UserService {
     if (user) {
       this.cacheService
         .set(`user:${user.email}`, user, 3600)
-        .catch((error) => console.log("Background cache set failed", error.message));
+        .catch((error: Error) => console.log("Background cache set failed", error.message));
     }
 
     return user;
@@ -109,7 +108,7 @@ export class UserService {
     if (user) {
       this.cacheService
         .set(`user:${user.id}`, user, 3600)
-        .catch((error) => console.warn("⚠️ Background cache update failed:", error.message));
+        .catch((error: Error) => console.warn("⚠️ Background cache update failed:", error.message));
 
       // Non-blocking Kafka
       // const event: UserUpdatedEvent = {
@@ -134,7 +133,7 @@ export class UserService {
     if (success) {
       this.cacheService
         .delete(`user:${id}`)
-        .catch((error) => console.warn("⚠️ Background cache delete failed:", error.message));
+        .catch((error: Error) => console.warn("⚠️ Background cache delete failed:", error.message));
     }
     return success;
   }

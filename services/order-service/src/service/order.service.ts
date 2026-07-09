@@ -1,6 +1,6 @@
 import { ICacheService, IMessagingService, OrderCreatedEvent } from "shared";
 import { inject, injectable } from "tsyringe";
-import { Order } from "../entities/order.entity";
+import { Order, OrderItem } from "../entities/order.entity";
 import { CreateOrderDto } from "../dtos/orders.dto";
 import { OrderRepository } from "../repository/order.repository";
 
@@ -28,7 +28,7 @@ export class OrderService {
         userId: createdOrder.userId,
         items: createdOrder.items,
         totalAmount: createdOrder.items.reduce(
-          (total, item) => total + item.price * item.quantity,
+          (total: number, item: OrderItem) => total + item.price * item.quantity,
           0,
         ),
       },

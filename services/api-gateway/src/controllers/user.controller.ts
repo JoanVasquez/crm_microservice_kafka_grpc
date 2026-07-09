@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { HttpStatus, ResponseTemplate, Roles, UserServiceClient } from "shared";
+import { HttpStatus, ResponseTemplate, Role, UserServiceClient } from "shared";
 
 type UserIdParams = {
   id: string;
@@ -13,7 +13,7 @@ type GatewayUpdateUserBody = {
   firstName?: string;
   lastName?: string;
   isActive?: boolean;
-  roles: Roles[];
+  roles: Role[];
 };
 
 export class UserController {

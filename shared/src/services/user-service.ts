@@ -1,5 +1,5 @@
 import { config } from "../config/config";
-import { Roles } from "../utils/auth-grpc";
+import { Role } from "../types/roles";
 import { GrpcService } from "../utils/grpc-service";
 
 export interface CreateUserRequest {
@@ -7,7 +7,7 @@ export interface CreateUserRequest {
   firstName: string;
   lastName: string;
   password: string;
-  roles: Roles[];
+  roles: Role[];
 }
 
 export interface GetUserByEmailRequest {
@@ -33,7 +33,7 @@ export interface UpdateUserRequest {
   firstName?: string;
   lastName?: string;
   isActive?: boolean;
-  roles: Roles[];
+  roles: Role[];
 }
 
 export interface DeleteUserRequest {
@@ -50,7 +50,7 @@ export interface UserResponse {
   firstName: string;
   lastName: string;
   isActive: boolean;
-  roles: Roles[];
+  roles: Role[];
   createdAt: string;
   updatedAt: string;
 }

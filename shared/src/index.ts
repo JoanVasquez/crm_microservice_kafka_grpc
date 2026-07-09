@@ -1,6 +1,7 @@
 export * from "./config/database";
 export * from "./utils/grpc-client";
 export * from "./types/events";
+export * from "./types/roles";
 export * from "./utils/metrics";
 export * from "./kafka/IMessagingService";
 export * from "./config/kafka";

@@ -1,4 +1,4 @@
-import { Roles } from "shared/dist";
+import { Role } from "shared/dist";
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -25,7 +25,7 @@ export class User {
   password!: string;
 
   @Column({ type: "text", array: true, default: () => "ARRAY[]::text[]" })
-  roles!: Roles[];
+  roles!: Role[];
 
   @Column({ default: true })
   isActive!: boolean;
