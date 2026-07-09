@@ -46,4 +46,10 @@ export class UpdateUserDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @IsEnum(Role, { each: true })
+  roles?: Role[];
 }

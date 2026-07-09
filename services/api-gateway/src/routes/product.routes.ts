@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { body } from "express-validator";
-import { Role } from "shared";
+import { RoleGroup } from "shared";
 import { validateRequest } from "../middleware/validate-request";
 import { authenticateToken, authorize } from "../middleware/auth";
 import { ProductController } from "../controllers/product.controller";
@@ -12,7 +12,7 @@ const productController = new ProductController();
 router.post(
   "/",
   authenticateToken,
-  authorize([Role.CrmAdministrator, Role.VendorUser]),
+  authorize(RoleGroup.ProductWrite),
   [
     body("name").trim().isLength({ min: 2, max: 100 }),
     body("description").trim().isLength({ min: 10, max: 1000 }),
@@ -26,21 +26,21 @@ router.post(
 router.get(
   "/",
   authenticateToken,
-  authorize([Role.CrmAdministrator, Role.VendorUser, Role.ClientPortalUser]),
+  authorize(RoleGroup.ProductRead),
   productController.getProducts.bind(productController),
 );
 
 router.get(
   "/:id",
   authenticateToken,
-  authorize([Role.CrmAdministrator, Role.VendorUser, Role.ClientPortalUser]),
+  authorize(RoleGroup.ProductRead),
   productController.getProduct.bind(productController),
 );
 
 router.put(
   "/:id",
   authenticateToken,
-  authorize([Role.CrmAdministrator, Role.VendorUser]),
+  authorize(RoleGroup.ProductWrite),
   [
     body("name").optional().trim().isLength({ min: 2, max: 100 }),
     body("description").optional().trim().isLength({ min: 10, max: 1000 }),
@@ -54,7 +54,7 @@ router.put(
 router.patch(
   "/:id/stock",
   authenticateToken,
-  authorize([Role.CrmAdministrator, Role.VendorUser]),
+  authorize(RoleGroup.ProductWrite),
   [body("quantity").isInt({ gt: -1 }), validateRequest],
   productController.updateStock.bind(productController),
 );
@@ -62,7 +62,7 @@ router.patch(
 router.delete(
   "/:id",
   authenticateToken,
-  authorize([Role.CrmAdministrator, Role.VendorUser]),
+  authorize(RoleGroup.ProductWrite),
   productController.deleteProduct.bind(productController),
 );
 

@@ -33,7 +33,7 @@ export interface UpdateUserRequest {
   firstName?: string;
   lastName?: string;
   isActive?: boolean;
-  roles: Role[];
+  roles?: Role[];
 }
 
 export interface DeleteUserRequest {

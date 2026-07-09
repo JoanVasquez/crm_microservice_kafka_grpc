@@ -29,13 +29,14 @@ export const authenticateToken = async (
       throw new AuthError("Invalid token structure");
     }
 
+    req.token = token;
     next();
   } catch (error) {
     next(error);
   }
 };
 
-export const authorize = (roles: Role[]): RequestHandler => {
+export const authorize = (roles: readonly Role[]): RequestHandler => {
   return async (req: Request, _: Response, next: NextFunction): Promise<void> => {
     if (!req.token) throw new AuthError("Unauthorized");
     const decoded = jwt.verify(req.token, config.jwtSecret) as AuthedUser;

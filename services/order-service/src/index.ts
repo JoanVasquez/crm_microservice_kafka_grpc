@@ -3,7 +3,7 @@ import { container } from "tsyringe";
 import { GrpcObject, Server, ServerCredentials, ServiceDefinition, UntypedServiceImplementation, loadPackageDefinition } from "@grpc/grpc-js";
 import { loadSync } from "@grpc/proto-loader";
 import { register } from "shared/dist/utils/metrics";
-import { Role } from "shared/dist";
+import { RoleGroup } from "shared/dist";
 import { registerDependencies } from "./containers";
 import { initializeDatabase } from "./config/database";
 import { OrderController } from "./controller/order.controller";
@@ -39,15 +39,15 @@ async function startServer() {
     server.addService(orderProto.OrderService.service, {
       CreateOrder: wrapUnary(
         orderController.CreateOrder.bind(orderController),
-        authUnaryInterceptor([Role.ClientPortalUser]),
+        authUnaryInterceptor(RoleGroup.OrderCreate),
       ),
       GetOrder: wrapUnary(
         orderController.GetOrder.bind(orderController),
-        authUnaryInterceptor([Role.CrmAdministrator]),
+        authUnaryInterceptor(RoleGroup.OrderRead),
       ),
       GetUserOrders: wrapUnary(
         orderController.GetUserOrders.bind(orderController),
-        authUnaryInterceptor([Role.CrmAdministrator, Role.ClientPortalUser]),
+        authUnaryInterceptor(RoleGroup.OrderRead),
       ),
     });
 

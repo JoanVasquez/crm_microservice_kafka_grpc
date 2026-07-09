@@ -10,7 +10,7 @@ import {
 } from "@grpc/grpc-js";
 import { loadSync } from "@grpc/proto-loader";
 import { register } from "shared/dist/utils/metrics";
-import { Role } from "shared/dist";
+import { RoleGroup } from "shared/dist";
 import { UserController } from "./controller/user.controller";
 import { registerDependencies } from "./containers";
 import { initializeDatabase } from "./config/database";
@@ -48,20 +48,20 @@ async function startServer() {
       CreateUser: userController.CreateUser.bind(userController),
       GetUser: wrapUnary(
         userController.GetUser.bind(userController),
-        authUnaryInterceptor([Role.CrmAdministrator, Role.ClientPortalUser]),
+        authUnaryInterceptor(RoleGroup.UserRead),
       ),
       ValidateUser: userController.ValidateUser.bind(userController),
       GetUserByEmail: wrapUnary(
         userController.GetUserByEmail.bind(userController),
-        authUnaryInterceptor([Role.CrmAdministrator, Role.ClientPortalUser]),
+        authUnaryInterceptor(RoleGroup.UserRead),
       ),
       UpdateUser: wrapUnary(
         userController.UpdateUser.bind(userController),
-        authUnaryInterceptor([Role.CrmAdministrator, Role.ClientPortalUser]),
+        authUnaryInterceptor(RoleGroup.UserManagement),
       ),
       DeleteUser: wrapUnary(
         userController.DeleteUser.bind(userController),
-        authUnaryInterceptor([Role.CrmAdministrator]),
+        authUnaryInterceptor(RoleGroup.UserManagement),
       ),
     });
 

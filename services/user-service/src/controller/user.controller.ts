@@ -93,6 +93,7 @@ export class UserController {
         firstName: call.request.firstName,
         lastName: call.request.lastName,
         isActive: call.request.isActive,
+        roles: call.request.roles,
       } as UpdateUserDto);
       const userResponse: UserResponse = this.mapUserResponse(user);
 

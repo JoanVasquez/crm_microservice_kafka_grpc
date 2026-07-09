@@ -13,7 +13,7 @@ type GatewayUpdateUserBody = {
   firstName?: string;
   lastName?: string;
   isActive?: boolean;
-  roles: Role[];
+  roles?: Role[];
 };
 
 export class UserController {
@@ -21,15 +21,6 @@ export class UserController {
 
   constructor() {
     this.userService = new UserServiceClient();
-  }
-
-  private updateGatewayUser(id: string, request: GatewayUpdateUserBody) {
-    const updateUser = this.userService.updateUser as (
-      userId: string,
-      payload: GatewayUpdateUserBody,
-    ) => ReturnType<UserServiceClient["updateUser"]>;
-
-    return updateUser.call(this.userService, id, request);
   }
 
   async getUser(req: Request<UserIdParams>, res: Response, next: NextFunction): Promise<void> {
@@ -75,12 +66,12 @@ export class UserController {
       const userId = req.params.id;
       const { firstName, lastName, isActive, roles } = req.body;
       const updateRequest: GatewayUpdateUserBody = {
-        roles,
         ...(firstName !== undefined ? { firstName } : {}),
         ...(lastName !== undefined ? { lastName } : {}),
         ...(isActive !== undefined ? { isActive } : {}),
+        ...(roles !== undefined ? { roles } : {}),
       };
-      const updatedUser = await this.updateGatewayUser(userId, updateRequest);
+      const updatedUser = await this.userService.updateUser(userId, updateRequest);
 
       res
         .status(HttpStatus.OK.code)

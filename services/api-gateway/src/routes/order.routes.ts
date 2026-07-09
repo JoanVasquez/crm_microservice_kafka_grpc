@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { body } from "express-validator";
-import { Role } from "shared";
+import { RoleGroup } from "shared";
 import { validateRequest } from "../middleware/validate-request";
 import { authenticateToken, authorize } from "../middleware/auth";
 import { OrderController } from "../controllers/order.controller";
@@ -11,7 +11,7 @@ const orderController = new OrderController();
 router.post(
   "/",
   authenticateToken,
-  authorize([Role.ClientPortalUser]),
+  authorize(RoleGroup.OrderCreate),
   [
     body("userId").trim().isLength({ min: 2, max: 100 }),
     body("items").isArray({ min: 1 }),
@@ -26,13 +26,13 @@ router.post(
 router.get(
   "/:id",
   authenticateToken,
-  authorize([Role.CrmAdministrator]),
+  authorize(RoleGroup.OrderRead),
   orderController.getOrderById.bind(orderController),
 );
 router.get(
   "/user/:userId",
   authenticateToken,
-  authorize([Role.CrmAdministrator, Role.ClientPortalUser]),
+  authorize(RoleGroup.OrderRead),
   orderController.getOrdersByUserId.bind(orderController),
 );
 

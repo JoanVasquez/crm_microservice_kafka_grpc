@@ -60,7 +60,7 @@ export function verifyJwt(token: string): AuthedUser {
   };
 }
 
-export function requiredRoles(required: Role[]) {
+export function requiredRoles(required: readonly Role[]) {
   return (user?: AuthedUser) => {
     if (!user) return false;
     const roles = user.roles ?? [];
@@ -68,7 +68,7 @@ export function requiredRoles(required: Role[]) {
   };
 }
 
-export const authUnaryInterceptor = (roles: Role[]) => {
+export const authUnaryInterceptor = (roles: readonly Role[]) => {
   const rolecheck = requiredRoles(roles);
 
   return function <Req, Res>(

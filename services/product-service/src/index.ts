@@ -3,7 +3,7 @@ import { container } from "tsyringe";
 import { GrpcObject, Server, ServerCredentials, ServiceDefinition, UntypedServiceImplementation, loadPackageDefinition } from "@grpc/grpc-js";
 import { loadSync } from "@grpc/proto-loader";
 import { register } from "shared/dist/utils/metrics";
-import { Role } from "shared/dist";
+import { RoleGroup } from "shared/dist";
 import { ProductController } from "./controller/product.controller";
 import { registerDependencies } from "./containers";
 import { initializeDatabase } from "./config/database";
@@ -59,27 +59,27 @@ async function startServer() {
     server.addService(productProto.ProductService.service, {
       GetProduct: wrapUnary(
         productController.GetProduct.bind(productController),
-        authUnaryInterceptor([Role.CrmAdministrator, Role.VendorUser, Role.ClientPortalUser]),
+        authUnaryInterceptor(RoleGroup.ProductRead),
       ),
       CreateProduct: wrapUnary(
         productController.CreateProduct.bind(productController),
-        authUnaryInterceptor([Role.CrmAdministrator, Role.VendorUser]),
+        authUnaryInterceptor(RoleGroup.ProductWrite),
       ),
       UpdateProduct: wrapUnary(
         productController.UpdateProduct.bind(productController),
-        authUnaryInterceptor([Role.CrmAdministrator, Role.VendorUser]),
+        authUnaryInterceptor(RoleGroup.ProductWrite),
       ),
       DeleteProduct: wrapUnary(
         productController.DeleteProduct.bind(productController),
-        authUnaryInterceptor([Role.CrmAdministrator, Role.VendorUser]),
+        authUnaryInterceptor(RoleGroup.ProductWrite),
       ),
       GetProducts: wrapUnary(
         productController.GetProducts.bind(productController),
-        authUnaryInterceptor([Role.CrmAdministrator, Role.VendorUser, Role.ClientPortalUser]),
+        authUnaryInterceptor(RoleGroup.ProductRead),
       ),
       UpdateStock: wrapUnary(
         productController.UpdateStock.bind(productController),
-        authUnaryInterceptor([Role.CrmAdministrator, Role.VendorUser]),
+        authUnaryInterceptor(RoleGroup.ProductWrite),
       ),
     });
 
